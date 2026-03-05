@@ -1,0 +1,36 @@
+services:
+
+  mysql:
+    image: mysql
+    container_name: timebank-mysql
+    environment:
+      MYSQL_DATABASE: timebank
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: timebank-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: 'root'
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
