@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 SQLALCHEMY_DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mysql+pymysql://root:root@localhost:3306/timebank_users",
+    "mysql+pymysql://root:root@localhost:3306/timebank",
 )
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
