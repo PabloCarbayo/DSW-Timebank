@@ -3,12 +3,13 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthSection from "./components/auth/AuthSection";
 import ProfileSection from "./components/users/ProfileSection";
 import CardsSection from "./components/cards/CardsSection";
+import { Lock, User, CreditCard, Hourglass } from "lucide-react";
 import "./App.css";
 
 const TABS = [
-  { id: "auth", label: "🔐 Autenticación", icon: "🔐" },
-  { id: "profile", label: "👤 Perfil", icon: "👤" },
-  { id: "cards", label: "💳 Pagos", icon: "💳" },
+  { id: "auth", label: "Autenticación", icon: Lock },
+  { id: "profile", label: "Perfil", icon: User },
+  { id: "cards", label: "Pagos", icon: CreditCard },
 ];
 
 function AuthStatus() {
@@ -28,7 +29,7 @@ function AppContent() {
     <div className="app">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <h1 className="logo">⏳ TimeBank</h1>
+          <h1 className="logo"><Hourglass size={22} /> TimeBank</h1>
           <p className="logo-subtitle">API Testing Dashboard</p>
         </div>
         <nav className="sidebar-nav">
@@ -38,7 +39,7 @@ function AppContent() {
               className={`nav-item ${activeTab === tab.id ? "active" : ""}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <span className="nav-icon">{tab.icon}</span>
+              <span className="nav-icon"><tab.icon size={18} /></span>
               <span className="nav-label">{tab.label}</span>
             </button>
           ))}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { registerUser, loginUser, logoutUser } from "../../api/timebankApi";
 import { useAuth } from "../../context/AuthContext";
 import ResponsePanel, { FormField } from "../common/ResponsePanel";
+import { UserPlus, KeyRound, LogOut, Lock } from "lucide-react";
 
 function RegisterForm() {
     const [email, setEmail] = useState("");
@@ -30,7 +31,7 @@ function RegisterForm() {
 
     return (
         <div className="card">
-            <h3>📝 Registrar Usuario</h3>
+            <h3><UserPlus size={18} /> Registrar Usuario</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Email" type="email" value={email} onChange={setEmail} placeholder="user@example.com" />
                 <FormField label="Contraseña" type="password" value={password} onChange={setPassword} placeholder="Mín. 6 caracteres" />
@@ -69,7 +70,7 @@ function LoginForm() {
 
     return (
         <div className="card">
-            <h3>🔑 Iniciar Sesión</h3>
+            <h3><KeyRound size={18} /> Iniciar Sesión</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Email" type="email" value={email} onChange={setEmail} placeholder="user@example.com" />
                 <FormField label="Contraseña" type="password" value={password} onChange={setPassword} placeholder="Tu contraseña" />
@@ -101,7 +102,7 @@ function LogoutButton() {
 
     return (
         <div className="card">
-            <h3>🚪 Cerrar Sesión</h3>
+            <h3><LogOut size={18} /> Cerrar Sesión</h3>
             {token ? (
                 <>
                     <p className="info-text">
@@ -122,7 +123,7 @@ function LogoutButton() {
 export default function AuthSection() {
     return (
         <div className="section">
-            <h2 className="section-title">🔐 Autenticación</h2>
+            <h2 className="section-title"><Lock size={22} /> Autenticación</h2>
             <p className="section-subtitle">Backend TimeBank — <code>localhost:8000</code></p>
             <div className="cards-grid">
                 <RegisterForm />

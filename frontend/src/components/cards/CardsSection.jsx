@@ -7,6 +7,7 @@ import {
     getCardDetails,
 } from "../../api/paymentsApi";
 import ResponsePanel, { FormField } from "../common/ResponsePanel";
+import { CreditCard, ShieldCheck, SendHorizonal, WalletMinimal, Search } from "lucide-react";
 
 function CardRegisterForm() {
     const [name, setName] = useState("");
@@ -37,7 +38,7 @@ function CardRegisterForm() {
 
     return (
         <div className="card">
-            <h3>💳 Registrar Tarjeta</h3>
+            <h3><CreditCard size={18} /> Registrar Tarjeta</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Titular" value={name} onChange={setName} placeholder="John Doe" />
                 <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
@@ -78,7 +79,7 @@ function CardVerifyForm() {
 
     return (
         <div className="card">
-            <h3>✅ Verificar Tarjeta</h3>
+            <h3><ShieldCheck size={18} /> Verificar Tarjeta</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
@@ -119,7 +120,7 @@ function CardPayForm() {
 
     return (
         <div className="card">
-            <h3>💸 Realizar Pago</h3>
+            <h3><SendHorizonal size={18} /> Realizar Pago</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
@@ -161,7 +162,7 @@ function CardTopUpForm() {
 
     return (
         <div className="card">
-            <h3>💰 Recargar Saldo</h3>
+            <h3><WalletMinimal size={18} /> Recargar Saldo</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
@@ -195,7 +196,7 @@ function CardLookupForm() {
 
     return (
         <div className="card">
-            <h3>🔍 Consultar Tarjeta</h3>
+            <h3><Search size={18} /> Consultar Tarjeta</h3>
             <form onSubmit={handleSubmit}>
                 <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <button type="submit" disabled={loading} className="btn">
@@ -210,7 +211,7 @@ function CardLookupForm() {
 export default function CardsSection() {
     return (
         <div className="section">
-            <h2 className="section-title">💳 Pasarela de Pagos</h2>
+            <h2 className="section-title"><CreditCard size={22} /> Pasarela de Pagos</h2>
             <p className="section-subtitle">Backend Payments — <code>localhost:8001</code></p>
             <div className="cards-grid">
                 <CardRegisterForm />
