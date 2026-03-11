@@ -1,0 +1,276 @@
+/* ─── Landing ─────────────────────────────────────── */
+.landing {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 48px 24px;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.landing-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(29, 191, 115, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(29, 191, 115, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ─── Brand ───────────────────────────────────────── */
+.landing-brand {
+  position: relative;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: clamp(3.8rem, 7vw, 6.5rem);
+  font-weight: 900;
+  font-style: normal;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: -1px;
+  background: linear-gradient(180deg, #ffffff 20%, #a0a0a0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: -20px;
+}
+
+.landing-brand em {
+  font-style: italic;
+}
+
+/* ─── Title ───────────────────────────────────────── */
+.landing-title {
+  position: relative;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.8rem, 5.5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+
+.landing-title em {
+  font-style: italic;
+  color: var(--green);
+}
+
+/* ─── Slogan ──────────────────────────────────────── */
+.landing-slogan {
+  position: relative;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 540px;
+  line-height: 1.75;
+  margin-top: -16px;
+}
+
+.landing-slogan .accent {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* ─── Carousel ────────────────────────────────────── */
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 960px;
+}
+
+.carousel-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.carousel-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(29, 191, 115, 0.06);
+}
+
+.carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 4px;
+  scrollbar-width: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Service cards ───────────────────────────────── */
+.service-card {
+  flex: 1 0 0;
+  min-width: 110px;
+  padding: 28px 12px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover {
+  border-color: rgba(29, 191, 115, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(29, 191, 115, 0.08);
+  background: linear-gradient(145deg, rgba(29,191,115,0.08) 0%, rgba(255,255,255,0.02) 100%);
+}
+
+.service-icon-ring {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover .service-icon-ring {
+  background: rgba(29, 191, 115, 0.12);
+}
+
+.service-icon {
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.service-card:hover .service-icon {
+  color: var(--green);
+}
+
+.service-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+.service-card:hover .service-label {
+  color: var(--text-primary);
+}
+
+/* ─── CTA ─────────────────────────────────────────── */
+.landing-cta {
+  position: relative;
+  display: flex;
+  gap: 56px;
+  margin-top: 12px;
+}
+
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.cta-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+}
+
+.cta-btn {
+  padding: 16px 56px;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-block;
+  text-align: center;
+}
+
+.cta-btn--primary {
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: #fff;
+}
+
+.cta-btn--primary:hover {
+  background: var(--green-hover);
+  border-color: var(--green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(29, 191, 115, 0.3);
+}
+
+.cta-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.cta-btn--ghost:hover {
+  border-color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-2px);
+}
+
+/* ─── Responsive ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .landing {
+    gap: 32px;
+    padding: 32px 16px;
+  }
+
+  .landing-brand {
+    font-size: 3rem;
+  }
+
+  .landing-title {
+    font-size: 2.2rem;
+  }
+
+  .carousel {
+    gap: 10px;
+  }
+
+  .service-card {
+    width: 96px;
+    padding: 18px 10px 14px;
+  }
+
+  .service-icon-ring {
+    width: 38px;
+    height: 38px;
+  }
+
+  .landing-cta {
+    flex-direction: column;
+    gap: 28px;
+  }
+}

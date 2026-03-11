@@ -1,0 +1,228 @@
+/* ─── Auth Pages (Login / Register) ─────────────────── */
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  padding: 48px 24px;
+  overflow: hidden;
+}
+
+.auth-page-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 20%, rgba(29, 191, 115, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── Card ──────────────────────────────────────────── */
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── Back link ─────────────────────────────────────── */
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+  margin-bottom: -12px;
+}
+
+.auth-back:hover {
+  color: var(--green);
+}
+
+/* ─── Header ────────────────────────────────────────── */
+.auth-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-header-icon {
+  color: var(--green);
+}
+
+.auth-title {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.auth-subtitle em {
+  color: var(--green);
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* ─── Form ──────────────────────────────────────────── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-row {
+  display: flex;
+  gap: 14px;
+}
+
+.auth-row .auth-label {
+  flex: 1;
+}
+
+.auth-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.auth-input {
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.auth-input:focus {
+  border-color: var(--green);
+}
+
+.auth-input::placeholder {
+  color: var(--text-muted);
+}
+
+.auth-input-wrap {
+  position: relative;
+}
+
+.auth-input-wrap .auth-input {
+  padding-right: 44px;
+}
+
+.auth-pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  transition: color 0.2s;
+}
+
+.auth-pw-toggle:hover {
+  color: var(--text-secondary);
+}
+
+/* ─── Error / Success ───────────────────────────────── */
+.auth-error {
+  font-size: 0.85rem;
+  color: var(--error);
+  background: var(--error-bg);
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.auth-success {
+  text-align: center;
+  color: var(--success);
+  background: var(--success-bg);
+  padding: 16px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* ─── Submit ────────────────────────────────────────── */
+.auth-submit {
+  padding: 14px;
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: var(--green-hover);
+  border-color: var(--green-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(29, 191, 115, 0.25);
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Footer text ───────────────────────────────────── */
+.auth-footer-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.auth-link {
+  color: var(--green);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.auth-link:hover {
+  color: var(--green-hover);
+  text-decoration: underline;
+}
+
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 500px) {
+  .auth-card {
+    padding: 32px 24px;
+  }
+
+  .auth-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
