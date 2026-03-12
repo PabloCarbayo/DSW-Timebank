@@ -1,28 +1,38 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+
+import app.database as db_module
 from app.controllers import card_controller
 
-# Inicializar Base de Datos (crea las tablas)
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Create database tables on startup."""
+    db_module.Base.metadata.create_all(bind=db_module.engine)
+    yield
+
 
 app = FastAPI(
     title="Simple Payment Gateway API",
-    description="Backend de pasarela de pagos simulada para Time Bank",
-    version="1.0.0"
+    description="Simulated payment gateway backend for Time Bank",
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
-# Configurar CORS si fuera necesario
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Ajustar en produccion
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Incluir Rutas
+# Include routers
 app.include_router(card_controller.router)
+
 
 @app.get("/")
 def read_root():

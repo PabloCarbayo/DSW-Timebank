@@ -18,9 +18,7 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 def get_my_profile(
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Obtener el perfil del usuario autenticado.
-    """
+    """Retrieve the authenticated user's profile."""
     return current_user
 
 
@@ -30,7 +28,5 @@ def update_my_profile(
     current_user: User = Depends(get_current_user),
     service: UserService = Depends(get_user_service),
 ):
-    """
-    Actualizar los datos del perfil del usuario autenticado.
-    """
+    """Update the authenticated user's profile data."""
     return service.update_profile(current_user.id, data)

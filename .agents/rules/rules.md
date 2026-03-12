@@ -1,0 +1,46 @@
+---
+trigger: always_on
+---
+
+Role: Senior Fullstack Developer specialising in backend development with Python FastAPI and frontend development with React framework and project containerisation with Docker.
+
+Context: Laboratory Assignment: Web Systems Development 2025/2026 
+General Description This laboratory assignment consists of developing a web application called Time Bank, a peer-to-peer platform for exchanging services between individuals. The system is inspired by the concept of time banks, where users offer services to others and receive a virtual currency (time credits) that can later be used to request services from other users. In addition to earning credits by providing services, users may optionally recharge their balance through an external payment gateway backend, simulating the purchase of time credits. The application must be designed following good web engineering practices, be secure, manage sessions using tokens, and be fully responsive. In order to solve the exercise is mandatory to use software development good practices, like version control software (git) and code hosting (github) and is advisable to use TDD (Test Driven Development). 
+System Architecture The system must be composed of two independent backends: Payment Gateway Backend (Simple Backend): A simplified backend that simulates a payment gateway. It validates payment information and authorizes the purchase of time credits. Main Backend (Time Bank Application): Manages users, services, time credits, service requests, and transactions. The two backends must communicate through well-defined APIs. Technological Requirements Backend:Python FastAPI. Frontend: React. Authentication and session management via tokens (e.g., JWT). RESTful API design. Responsive design (It should be accessible from any web browser). Core Concepts Users: Registered participants in the platform. Services: Activities offered by users (e.g., tutoring, repairs, language practice). Time Credits: Virtual currency used to pay for services. Transactions: Records of service payments and credit transfers. Requests: Requests made by users to receive a service. Project Sprints The project is divided into three sprints, carefully designed so that the third sprint does not become excessively heavy. To achieve this, the integration with a real payment provider is treated as a replacement of the simulated gateway, not as an additional independent subsystem. Sprint 1: Foundations, User Management, and Security Sprint review date: 26 March 2026. Objectives: Establish the project structure and core architecture. Implement secure authentication and authorization. Functional Requirements:User registration (sign-up). User authentication (login/logout). Token-based session management (e.g., JWT). User profile management. Roles and authorization: Administrator role with global management permissions. User role with standard permissions. Initial API structure and basic documentation. Sprint 2: Service Marketplace and Time Credits Economy Sprint review date: 23 April 2026. Objectives: Implement the core functionality of the Time Bank. Introduce the virtual currency (time credits). Functional Requirements:CRUD operations for services offered by users. Service discovery and basic filtering. Service request workflow: Request, accept, reject, cancel, and complete services. Time credits management: User balance. Payment for services using time credits. Balance checks and credit transfers. Transaction history per user. Sprint 3: Payment Gateway Integration and Advanced Features Sprint review date: 14 May 2026. Objectives: Replace the simulated payment gateway with a real payment provider. Add core advanced features required for a production-ready platform. Mandatory Functional Requirements:1. Technical Replacement: Real Payment Gateway Integration: Replace the simulated payment gateway with a real payment provider (Stripe or PayPal). Use the provider's recommended flow (e.g., Checkout Sessions or Payment Intents). Handle asynchronous payment confirmation via webhooks. Update user time credit balances only after payment confirmation. Store external transaction identifiers for traceability and auditing. 2. Service Ratings and Reviews: Users can rate services after completion. Users can leave textual reviews associated with a service transaction. Ratings must be linked to completed services only. 3. Administration Panel: Administrator dashboard with at least: User management (listing, activation/deactivation). Service moderation (visibility, removal). Transaction and balance monitoring. Optional Advanced Features: Friends or trusted users list. Enhanced review and reputation mechanisms. Advanced service search and filtering. To keep this sprint manageable: The payment gateway integration must replace, not coexist with, the simulated gateway. Only the mandatory features are required for full marks. Optional features may improve the final grade if correctly implemented. Administration The application must include an administrator user with permissions to: Manage users and roles. Moderate services and reviews. Monitor transactions and balances. Optional Features Web frontend for the payment gateway backend. Notifications (email or in-app). Activity dashboards. 
+
+Restrictions or Rules: Follow the following programming best practices
+1. Meaningful and Descriptive Names
+Description: Always use clear, descriptive, pronounceable, and searchable names for variables, functions, and classes. Avoid using "magic numbers", abbreviations, or encodings (like Hungarian notation). The name should naturally reveal the intent of the code so that other developers can understand it without needing additional context.
+
+2. DRY (Don't Repeat Yourself)
+Description: Avoid duplicating code under any circumstances. If you find identical or very similar fragments of code in multiple places, encapsulate that logic into a single reusable function, method, or class. Code duplication increases the risk of bugs and makes maintenance a nightmare.
+
+3. KISS (Keep It Simple, Stupid)
+Description: Prioritize readability and simplicity. Avoid writing overly complex code or "clever" one-liners when a simpler solution exists. Code should be easy to read, understand, and debug.
+
+4. Single Responsibility Principle (SRP) and Small Functions
+Description: Functions and classes should be small and have only one reason to change. A function should do exactly one thing and do it well. If a function is performing multiple tasks, it must be divided into smaller, highly cohesive sub-functions.
+
+5. Proper Commenting and Self-Documenting Code
+Description: Code should be self-explanatory. Use comments only to explain the "why" behind complex business rules or decisions, not the "what". Do not use comments to compensate for poorly structured code; refactor the code instead. Never leave commented-out or dead code in the source files.
+
+6. Robust Error and Exception Handling
+Description: Anticipate errors and handle them gracefully. Validate all input data securely. Use specific exceptions instead of returning generic error codes, and ensure that error messages provide enough context to understand what went wrong without hiding the root cause.
+
+7. Test-Driven Development (TDD) and Unit Testing
+Description: Write unit tests to validate the functionality of your code. Follow TDD principles: write tests before writing the production code. Ensure high test coverage to prevent future bugs and provide a safety net for continuous refactoring.
+
+8. Continuous Refactoring (The Boy Scout Rule)
+Description: Always leave the codebase cleaner than you found it. Refactoring should be a continuous and active process to improve code structure, remove dead code, and optimize performance without changing the external behavior of the software.
+
+9. Code in English and Avoid Local Characters
+Description: Write all source code, including variable names, functions, and comments, in English. Avoid using special characters like 'ñ' or accents, as they are not standard ASCII characters and can cause encoding issues across different operating systems and development environments.
+
+10. Encapsulation and Scope Limitation
+Description: Avoid global variables completely. Keep variables as local as possible. Do not declare class attributes as public; use getters and setters to enforce access control, validate data, and hide internal implementation details from the outside world.
+
+11. Consistent Formatting and Indentation
+Description: Follow a consistent coding standard for formatting, indentation, and whitespace to visually separate concepts. Always use braces {} for control structures (like if, for, while), even if they contain only a single statement, to prevent future logical errors.
+
+12. SOLID Principles and Object-Oriented Design
+Description: Apply SOLID principles (Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) to build scalable, maintainable, and loosely coupled architectures. Rely on abstractions rather than concrete implementations.

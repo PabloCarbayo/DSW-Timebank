@@ -1,10 +1,10 @@
 """
-Tests con pytest para el Time Bank User Management API.
+Pytest tests for the Time Bank User Management API.
 
-Usa una base de datos SQLite en memoria para cada test,
-por lo que NO necesitas arrancar el servidor con uvicorn.
+Uses an in-memory SQLite database for each test,
+so there is NO need to start the server with uvicorn.
 
-Ejecutar con:
+Run with:
     pytest test_pytest_api.py -v
 """
 
@@ -16,19 +16,19 @@ from sqlalchemy.pool import StaticPool
 
 from main import app
 from app.database import Base, get_db
-# Importar el modelo para que Base.metadata conozca las tablas
+# Import the model so Base.metadata knows about the tables
 from app.models.user import User  # noqa: F401
 
 
 # ──────────────────────────────────────────────
-# Fixtures: Base de datos en memoria para tests
+# Fixtures: In-memory database for tests
 # ──────────────────────────────────────────────
 
 @pytest.fixture(name="client")
 def client_fixture():
     """
-    Crea un TestClient con una base de datos SQLite en memoria.
-    Cada test obtiene una base de datos limpia y aislada.
+    Create a TestClient backed by an in-memory SQLite database.
+    Each test gets a clean, isolated database.
     """
     test_engine = create_engine(
         "sqlite://",
@@ -60,7 +60,7 @@ def client_fixture():
 
 
 # ──────────────────────────────────────────────
-# Datos de prueba reutilizables
+# Reusable test data
 # ──────────────────────────────────────────────
 
 USER_DATA = {
@@ -77,29 +77,29 @@ LOGIN_DATA = {
 
 
 def register_user(client):
-    """Helper: registra un usuario y devuelve la respuesta."""
+    """Helper: register a user and return the response."""
     return client.post("/api/v1/auth/register", json=USER_DATA)
 
 
 def login_user(client):
-    """Helper: registra y hace login, devuelve el token."""
+    """Helper: register and log in, return the token."""
     register_user(client)
     response = client.post("/api/v1/auth/login", json=LOGIN_DATA)
     return response.json()["access_token"]
 
 
 def auth_header(token):
-    """Helper: devuelve las cabeceras de autorización."""
+    """Helper: return the authorization headers."""
     return {"Authorization": f"Bearer {token}"}
 
 
 # ──────────────────────────────────────────────
-# Tests: Registro de usuarios
+# Tests: User registration
 # ──────────────────────────────────────────────
 
 class TestRegister:
     def test_register_success(self, client):
-        """Registrar un usuario nuevo devuelve 200 y los datos correctos."""
+        """Registering a new user returns 200 and the correct data."""
         response = register_user(client)
         assert response.status_code == 200
 
@@ -114,20 +114,20 @@ class TestRegister:
         assert "hashed_password" not in data
 
     def test_register_duplicate_email(self, client):
-        """Registrar con email duplicado devuelve 400."""
+        """Registering with a duplicate email returns 400."""
         register_user(client)
         response = register_user(client)
         assert response.status_code == 400
         assert "already registered" in response.json()["detail"]
 
     def test_register_invalid_email(self, client):
-        """Registrar con email inválido devuelve 422."""
+        """Registering with an invalid email returns 422."""
         data = {**USER_DATA, "email": "not-an-email"}
         response = client.post("/api/v1/auth/register", json=data)
         assert response.status_code == 422
 
     def test_register_short_password(self, client):
-        """Registrar con contraseña corta devuelve 422."""
+        """Registering with a short password returns 422."""
         data = {**USER_DATA, "email": "short@test.com", "password": "123"}
         response = client.post("/api/v1/auth/register", json=data)
         assert response.status_code == 422
@@ -139,7 +139,7 @@ class TestRegister:
 
 class TestLogin:
     def test_login_success(self, client):
-        """Login con credenciales correctas devuelve un token JWT."""
+        """Logging in with correct credentials returns a JWT token."""
         register_user(client)
         response = client.post("/api/v1/auth/login", json=LOGIN_DATA)
         assert response.status_code == 200
@@ -149,7 +149,7 @@ class TestLogin:
         assert data["token_type"] == "bearer"
 
     def test_login_wrong_password(self, client):
-        """Login con contraseña incorrecta devuelve 401."""
+        """Logging in with incorrect password returns 401."""
         register_user(client)
         response = client.post("/api/v1/auth/login", json={
             "email": "john@example.com",
@@ -159,7 +159,7 @@ class TestLogin:
         assert "Invalid email or password" in response.json()["detail"]
 
     def test_login_nonexistent_user(self, client):
-        """Login con email inexistente devuelve 401."""
+        """Logging in with a nonexistent email returns 401."""
         response = client.post("/api/v1/auth/login", json={
             "email": "noone@example.com",
             "password": "somepassword",
@@ -173,19 +173,19 @@ class TestLogin:
 
 class TestLogout:
     def test_logout(self, client):
-        """Logout devuelve mensaje de éxito."""
+        """Logout returns a success message."""
         response = client.post("/api/v1/auth/logout")
         assert response.status_code == 200
         assert "logged out" in response.json()["message"]
 
 
 # ──────────────────────────────────────────────
-# Tests: Perfil de usuario (GET /me)
+# Tests: User profile (GET /me)
 # ──────────────────────────────────────────────
 
 class TestGetProfile:
     def test_get_profile_success(self, client):
-        """Obtener perfil con token válido devuelve los datos del usuario."""
+        """Getting profile with a valid token returns the user data."""
         token = login_user(client)
         response = client.get("/api/v1/users/me", headers=auth_header(token))
         assert response.status_code == 200
@@ -195,12 +195,12 @@ class TestGetProfile:
         assert data["first_name"] == "John"
 
     def test_get_profile_no_token(self, client):
-        """Obtener perfil sin token devuelve 401."""
+        """Getting profile without a token returns 401."""
         response = client.get("/api/v1/users/me")
         assert response.status_code == 401
 
     def test_get_profile_invalid_token(self, client):
-        """Obtener perfil con token inválido devuelve 401."""
+        """Getting profile with an invalid token returns 401."""
         response = client.get(
             "/api/v1/users/me",
             headers={"Authorization": "Bearer invalidtoken123"},
@@ -209,12 +209,12 @@ class TestGetProfile:
 
 
 # ──────────────────────────────────────────────
-# Tests: Actualización de perfil (PUT /me)
+# Tests: Profile update (PUT /me)
 # ──────────────────────────────────────────────
 
 class TestUpdateProfile:
     def test_update_name(self, client):
-        """Actualizar el nombre del usuario funciona correctamente."""
+        """Updating the user name works correctly."""
         token = login_user(client)
         response = client.put(
             "/api/v1/users/me",
@@ -228,7 +228,7 @@ class TestUpdateProfile:
         assert data["last_name"] == "Smith"
 
     def test_update_password(self, client):
-        """Actualizar la contraseña permite login con la nueva contraseña."""
+        """Updating the password allows login with the new password."""
         token = login_user(client)
         response = client.put(
             "/api/v1/users/me",
@@ -237,19 +237,19 @@ class TestUpdateProfile:
         )
         assert response.status_code == 200
 
-        # Login con la nueva contraseña
+        # Login with the new password
         response = client.post("/api/v1/auth/login", json={
             "email": "john@example.com",
             "password": "newpassword456",
         })
         assert response.status_code == 200
 
-        # Login con la antigua falla
+        # Login with the old password fails
         response = client.post("/api/v1/auth/login", json=LOGIN_DATA)
         assert response.status_code == 401
 
     def test_update_partial(self, client):
-        """Actualizar solo un campo no modifica los demás."""
+        """Updating only one field does not modify the others."""
         token = login_user(client)
         response = client.put(
             "/api/v1/users/me",
@@ -263,19 +263,19 @@ class TestUpdateProfile:
         assert data["last_name"] == "Doe"
 
     def test_update_no_token(self, client):
-        """Actualizar perfil sin token devuelve 401."""
+        """Updating profile without a token returns 401."""
         response = client.put("/api/v1/users/me", json={"first_name": "Jane"})
         assert response.status_code == 401
 
 
 # ──────────────────────────────────────────────
-# Tests: Flujo completo de integración
+# Tests: Full integration flow
 # ──────────────────────────────────────────────
 
 class TestIntegrationFlow:
     def test_full_user_flow(self, client):
-        """Flujo completo: registro → login → perfil → actualizar → verificar."""
-        # 1. Registrar usuario
+        """Full flow: register -> login -> profile -> update -> verify."""
+        # 1. Register user
         res = register_user(client)
         assert res.status_code == 200
         assert res.json()["email"] == "john@example.com"
@@ -285,12 +285,12 @@ class TestIntegrationFlow:
         assert res.status_code == 200
         token = res.json()["access_token"]
 
-        # 3. Obtener perfil
+        # 3. Get profile
         res = client.get("/api/v1/users/me", headers=auth_header(token))
         assert res.status_code == 200
         assert res.json()["first_name"] == "John"
 
-        # 4. Actualizar nombre
+        # 4. Update name
         res = client.put(
             "/api/v1/users/me",
             headers=auth_header(token),
@@ -299,7 +299,7 @@ class TestIntegrationFlow:
         assert res.status_code == 200
         assert res.json()["first_name"] == "Johnny"
 
-        # 5. Verificar que el cambio persiste
+        # 5. Verify change persists
         res = client.get("/api/v1/users/me", headers=auth_header(token))
         assert res.status_code == 200
         assert res.json()["first_name"] == "Johnny"
