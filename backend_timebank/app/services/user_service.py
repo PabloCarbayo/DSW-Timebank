@@ -1,12 +1,10 @@
 from fastapi import HTTPException, status
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
+from app.auth.password import hash_password
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserUpdate
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class UserService:
@@ -37,6 +35,6 @@ class UserService:
         if data.last_name is not None:
             user.last_name = data.last_name
         if data.password is not None:
-            user.hashed_password = pwd_context.hash(data.password)
+            user.hashed_password = hash_password(data.password)
 
         return self.repository.update(user)
