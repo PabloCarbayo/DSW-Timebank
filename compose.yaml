@@ -32,5 +32,42 @@ services:
     depends_on:
       - mysql
 
+
+  backend_timebank:
+    build: ./backend_timebank
+    container_name: timebank-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "mysql+pymysql://root:root@mysql:3306/timebank"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+
+
+  backend_payments:
+    build: ./backend_payments
+    container_name: payments-backend
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: "mysql+pymysql://root:root@mysql:3306/payments"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+
+
+  frontend:
+    build: ./frontend
+    container_name: timebank-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend_timebank
+      - backend_payments
+
+
 volumes:
   mysql_data:

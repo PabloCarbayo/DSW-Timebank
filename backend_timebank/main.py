@@ -16,21 +16,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Time Bank API",
-    description="Backend principal de Time Bank — Gestión de usuarios y servicios",
+    description="Main backend for Time Bank — User and service management",
     version="1.0.0",
     lifespan=lifespan,
 )
 
-# Configurar CORS
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Ajustar en produccion
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Incluir Rutas
+# Include routers
 app.include_router(auth_controller.router)
 app.include_router(user_controller.router)
 

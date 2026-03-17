@@ -17,9 +17,7 @@ def register(
     user_in: UserRegister,
     service: AuthService = Depends(get_auth_service),
 ):
-    """
-    Registrar un nuevo usuario en la plataforma.
-    """
+    """Register a new user on the platform."""
     return service.register(user_in)
 
 
@@ -28,16 +26,12 @@ def login(
     credentials: UserLogin,
     service: AuthService = Depends(get_auth_service),
 ):
-    """
-    Iniciar sesión y obtener un token JWT.
-    """
+    """Log in and obtain a JWT token."""
     token = service.login(credentials)
     return TokenResponse(access_token=token)
 
 
 @router.post("/logout")
 def logout():
-    """
-    Cerrar sesión. En JWT stateless, el cliente elimina el token.
-    """
+    """Log out. In stateless JWT, the client discards the token."""
     return {"message": "Successfully logged out"}

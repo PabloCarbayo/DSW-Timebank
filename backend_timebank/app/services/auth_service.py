@@ -1,13 +1,11 @@
 from fastapi import HTTPException, status
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.auth.jwt_handler import create_access_token
+from app.auth.password import hash_password, verify_password
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserLogin, UserRegister
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AuthService:
@@ -24,7 +22,7 @@ class AuthService:
 
         user = User(
             email=user_in.email,
-            hashed_password=pwd_context.hash(user_in.password),
+            hashed_password=hash_password(user_in.password),
             first_name=user_in.first_name,
             last_name=user_in.last_name,
         )
@@ -33,7 +31,7 @@ class AuthService:
     def login(self, credentials: UserLogin) -> str:
         """Authenticate user and return a JWT access token. Raises 401 on failure."""
         user = self.repository.get_by_email(credentials.email)
-        if not user or not pwd_context.verify(credentials.password, user.hashed_password):
+        if not user or not verify_password(credentials.password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
