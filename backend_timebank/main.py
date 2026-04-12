@@ -4,7 +4,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.database as db_module
-from app.controllers import auth_controller, user_controller
+from app.controllers import (
+    auth_controller,
+    service_controller,
+    service_request_controller,
+    transaction_controller,
+    user_controller,
+)
+
+# Import all models so Base.metadata.create_all creates their tables
+import app.models.user  # noqa: F401
+import app.models.service  # noqa: F401
+import app.models.service_request  # noqa: F401
+import app.models.transaction  # noqa: F401
 
 
 @asynccontextmanager
@@ -33,6 +45,9 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_controller.router)
 app.include_router(user_controller.router)
+app.include_router(service_controller.router)
+app.include_router(service_request_controller.router)
+app.include_router(transaction_controller.router)
 
 
 @app.get("/")
