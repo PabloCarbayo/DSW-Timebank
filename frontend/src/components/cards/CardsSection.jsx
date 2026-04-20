@@ -40,13 +40,13 @@ function CardRegisterForm() {
         <div className="card">
             <h3><CreditCard size={18} /> Registrar Tarjeta</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Titular" value={name} onChange={setName} placeholder="John Doe" />
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Cardholder" value={name} onChange={setName} placeholder="John Doe" />
+                <FormField label="Number de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
                 <FormField label="Saldo inicial (€)" type="number" value={balance} onChange={setBalance} placeholder="100" />
                 <button type="submit" disabled={loading} className="btn">
-                    {loading ? "Registrando..." : "Registrar Tarjeta"}
+                    {loading ? "Registering..." : "Register Card"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -79,13 +79,13 @@ function CardVerifyForm() {
 
     return (
         <div className="card">
-            <h3><ShieldCheck size={18} /> Verificar Tarjeta</h3>
+            <h3><ShieldCheck size={18} /> Verify Card</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Number de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
                 <button type="submit" disabled={loading} className="btn">
-                    {loading ? "Verificando..." : "Verificar"}
+                    {loading ? "Verifying..." : "Verify"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -122,12 +122,12 @@ function CardPayForm() {
         <div className="card">
             <h3><SendHorizonal size={18} /> Realizar Pago</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Number de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
                 <FormField label="Importe (€)" type="number" value={amount} onChange={setAmount} placeholder="40.00" />
                 <button type="submit" disabled={loading} className="btn btn-danger">
-                    {loading ? "Procesando..." : "Pagar"}
+                    {loading ? "Processing..." : "Pay"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -164,7 +164,7 @@ function CardTopUpForm() {
         <div className="card">
             <h3><WalletMinimal size={18} /> Recargar Saldo</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Number de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
                 <FormField label="Importe (€)" type="number" value={amount} onChange={setAmount} placeholder="50.00" />
@@ -198,7 +198,7 @@ function CardLookupForm() {
         <div className="card">
             <h3><Search size={18} /> Consultar Tarjeta</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Number de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
                 <button type="submit" disabled={loading} className="btn">
                     {loading ? "Buscando..." : "Consultar"}
                 </button>

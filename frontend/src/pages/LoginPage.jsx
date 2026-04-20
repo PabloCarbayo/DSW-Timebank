@@ -58,7 +58,7 @@ export default function LoginPage() {
           </label>
 
           <label className="auth-label">
-            Contraseña
+            Password
             <div className="auth-input-wrap">
               <input
                 type={showPw ? "text" : "password"}

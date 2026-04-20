@@ -1,0 +1,455 @@
+.myservices-container {
+    padding: 2rem 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.myservices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+}
+
+.myservices-header h2 {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.myservices-header h2 span {
+    color: var(--green);
+    font-style: italic;
+}
+
+.myservices-header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+/* Service Card redesign for elegance */
+.service-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.service-card:hover {
+    border-color: rgba(29, 191, 115, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.cat-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--green);
+    background: rgba(29, 191, 115, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.edit-btn:hover {
+    color: var(--green);
+    border-color: var(--green);
+}
+
+.delete-btn:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.card-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex-grow: 1;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.price-tag {
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+}
+
+.status-tag {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-tag.active {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.status-tag.inactive {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+}
+
+.empty-state svg {
+    margin-bottom: 16px;
+    color: var(--text-muted);
+}
+
+.empty-state h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+}
+
+/* ─── ULTIMATE ELEGANT MODAL ─────────────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 24px;
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        left: 0;
+    }
+}
+
+.elegant-modal-card {
+    background: linear-gradient(145deg, #1e1e1e 0%, #151515 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 48px;
+    width: 100%;
+    max-width: 580px;
+    position: relative;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.elegant-modal-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.elegant-modal-card::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.elegant-modal-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.elegant-modal-title {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.elegant-modal-subtitle {
+    font-size: 1rem;
+    color: #a0a0a0;
+    max-width: 80%;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.elegant-label {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e0e0e0;
+    letter-spacing: 0.3px;
+}
+
+.elegant-input {
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+select.elegant-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23A0A0A0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px top 50%;
+    background-size: 12px auto;
+    padding-right: 48px;
+}
+
+.elegant-input:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(29, 191, 115, 0.5);
+    box-shadow: 0 0 0 4px rgba(29, 191, 115, 0.1);
+}
+
+.elegant-input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.form-group-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+textarea.elegant-input {
+    resize: vertical;
+    line-height: 1.6;
+    min-height: 120px;
+}
+
+/* Custom Checkbox */
+.elegant-checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.elegant-checkbox-wrap:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.elegant-checkbox-wrap input[type="checkbox"] {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.elegant-checkbox-wrap input[type="checkbox"]:checked {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.elegant-checkbox-wrap input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    top: 3px;
+}
+
+.elegant-checkbox-text {
+    font-size: 0.95rem;
+    color: #cccccc;
+}
+
+.elegant-checkbox-text em {
+    color: rgba(255,255,255,0.4);
+    font-style: normal;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.btn-elegant-secondary {
+    flex: 1;
+    padding: 16px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-elegant-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.btn-elegant-primary {
+    flex: 1.5;
+    padding: 16px;
+    background: var(--green);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-elegant-primary:hover {
+    background: var(--green-hover);
+    border-color: var(--green-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(29, 191, 115, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}

@@ -17,7 +17,7 @@ import {
 import "./LandingPage.css";
 
 const CATEGORIES = [
-  { icon: Code, label: "Programación" },
+  { icon: Code, label: "Programming" },
   { icon: Palette, label: "Diseño" },
   { icon: TrendingUp, label: "Marketing" },
   { icon: PenTool, label: "Escritura" },
@@ -47,18 +47,18 @@ export default function LandingPage() {
       <h1 className="landing-brand"><em>TimeBank</em></h1>
 
       <h2 className="landing-title">
-        Encuentra el <em>servicio</em><br />
+        Find the <em>service</em><br />
         adecuado de inmediato
       </h2>
 
       <p className="landing-slogan">
-        En <span className="accent">TimeBank</span> puedes intercambiar tu tiempo por el de otros.
+        En <span className="accent">TimeBank</span> you can exchange your time with others.
         Ofrece tus habilidades, encuentra las que necesitas y forma parte de
         una comunidad donde cada minuto cuenta.
       </p>
 
       <div className="carousel">
-        <button className="carousel-btn" onClick={() => scroll("left")} aria-label="Anterior">
+        <button className="carousel-btn" onClick={() => scroll("left")} aria-label="Previous">
           <ChevronLeft size={22} />
         </button>
         <div className="carousel-track" ref={scrollRef}>
@@ -71,7 +71,7 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-        <button className="carousel-btn" onClick={() => scroll("right")} aria-label="Siguiente">
+        <button className="carousel-btn" onClick={() => scroll("right")} aria-label="Next">
           <ChevronRight size={22} />
         </button>
       </div>

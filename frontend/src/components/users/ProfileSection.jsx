@@ -11,7 +11,7 @@ function GetProfileForm() {
 
     const handleSubmit = async () => {
         if (!token) {
-            setResult({ status: 401, data: { detail: "Necesitas hacer login primero" } });
+            setResult({ status: 401, data: { detail: "You need to login first" } });
             return;
         }
         setLoading(true);
@@ -26,10 +26,10 @@ function GetProfileForm() {
 
     return (
         <div className="card">
-            <h3><User size={18} /> Ver Mi Perfil</h3>
-            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requiere login</p>}
+            <h3><User size={18} /> View My Profile</h3>
+            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requires login</p>}
             <button onClick={handleSubmit} disabled={loading || !token} className="btn">
-                {loading ? "Cargando..." : "Obtener Perfil"}
+                {loading ? "Loading..." : "Get Profile"}
             </button>
             <ResponsePanel result={result} />
         </div>
@@ -47,7 +47,7 @@ function UpdateProfileForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!token) {
-            setResult({ status: 401, data: { detail: "Necesitas hacer login primero" } });
+            setResult({ status: 401, data: { detail: "You need to login first" } });
             return;
         }
         setLoading(true);
@@ -67,14 +67,14 @@ function UpdateProfileForm() {
 
     return (
         <div className="card">
-            <h3><Pencil size={18} /> Actualizar Perfil</h3>
-            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requiere login</p>}
+            <h3><Pencil size={18} /> Update Profile</h3>
+            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requires login</p>}
             <form onSubmit={handleSubmit}>
-                <FormField label="Nuevo Nombre" value={firstName} onChange={setFirstName} placeholder="(opcional)" required={false} />
-                <FormField label="Nuevo Apellido" value={lastName} onChange={setLastName} placeholder="(opcional)" required={false} />
-                <FormField label="Nueva Contraseña" type="password" value={password} onChange={setPassword} placeholder="(opcional, mín. 6)" required={false} />
+                <FormField label="New First Name" value={firstName} onChange={setFirstName} placeholder="(optional)" required={false} />
+                <FormField label="New Last Name" value={lastName} onChange={setLastName} placeholder="(optional)" required={false} />
+                <FormField label="New Password" type="password" value={password} onChange={setPassword} placeholder="(optional, min. 6)" required={false} />
                 <button type="submit" disabled={loading || !token} className="btn">
-                    {loading ? "Actualizando..." : "Actualizar"}
+                    {loading ? "Updating..." : "Update"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -85,7 +85,7 @@ function UpdateProfileForm() {
 export default function ProfileSection() {
     return (
         <div className="section">
-            <h2 className="section-title"><User size={22} /> Perfil de Usuario</h2>
+            <h2 className="section-title"><User size={22} /> User Profile</h2>
             <p className="section-subtitle">Backend TimeBank — <code>localhost:8000</code> — Requiere JWT</p>
             <div className="cards-grid">
                 <GetProfileForm />
