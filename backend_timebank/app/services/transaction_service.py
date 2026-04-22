@@ -72,21 +72,31 @@ class TransactionService:
         )
         return self.transaction_repository.create(transaction)
 
-    def transfer_credits(self, sender_id: int, receiver_id: int, amount: float) -> Transaction:
+    def transfer_credits(
+        self,
+        sender_id: int,
+        amount: float,
+        receiver_id: int | None = None,
+        receiver_email: str | None = None,
+    ) -> Transaction:
         """Transfer time credits from one user to another."""
-        if sender_id == receiver_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot transfer credits to yourself",
-            )
-
         sender = self.user_repository.get_by_id(sender_id)
-        receiver = self.user_repository.get_by_id(receiver_id)
+
+        if receiver_id is not None:
+            receiver = self.user_repository.get_by_id(receiver_id)
+        else:
+            receiver = self.user_repository.get_by_email((receiver_email or "").lower())
 
         if not receiver:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Receiver user not found",
+            )
+
+        if sender_id == receiver.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot transfer credits to yourself",
             )
 
         if sender.balance < amount:
@@ -102,7 +112,7 @@ class TransactionService:
 
         transaction = Transaction(
             sender_id=sender_id,
-            receiver_id=receiver_id,
+            receiver_id=receiver.id,
             amount=amount,
             transaction_type=TransactionType.CREDIT_TRANSFER,
             description=f"Transfer of {amount} credits to user {receiver.first_name} {receiver.last_name}",

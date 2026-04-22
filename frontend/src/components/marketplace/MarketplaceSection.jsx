@@ -1,68 +1,154 @@
-import { useState, useEffect } from "react";
-import { getServices } from "../../api/timebankApi";
-import { Search, Star, Clock, Code, Palette, TrendingUp, PenTool, Video, Bot, Music, Briefcase, Camera, GraduationCap, ArrowRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { createRequest, getServiceById, getServices } from "../../api/timebankApi";
+import {
+    Search,
+    Star,
+    Clock,
+    Code,
+    Palette,
+    TrendingUp,
+    PenTool,
+    Video,
+    Bot,
+    Music,
+    Briefcase,
+    Camera,
+    GraduationCap,
+    ArrowRight,
+    Eye,
+    X,
+} from "lucide-react";
 import "./MarketplaceSection.css";
 
 const CATEGORIES = [
   { icon: Code, label: "Programming" },
   { icon: Palette, label: "Design" },
   { icon: TrendingUp, label: "Marketing" },
-  { icon: PenTool, label: "Escritura" },
+  { icon: PenTool, label: "Writing" },
   { icon: Video, label: "Video" },
-  { icon: Bot, label: "IA" },
-  { icon: Music, label: "Música" },
-  { icon: Briefcase, label: "Negocios" },
-  { icon: Camera, label: "Fotografía" },
-  { icon: GraduationCap, label: "Educación" },
+  { icon: Bot, label: "AI" },
+  { icon: Music, label: "Music" },
+  { icon: Briefcase, label: "Business" },
+  { icon: Camera, label: "Photography" },
+  { icon: GraduationCap, label: "Education" },
 ];
 
 export default function MarketplaceSection() {
+    const navigate = useNavigate();
+    const { token } = useAuth();
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(9);
+    const [total, setTotal] = useState(0);
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
+    const [selectedService, setSelectedService] = useState(null);
+    const [requestLoading, setRequestLoading] = useState(false);
+    const [requestFeedback, setRequestFeedback] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm.trim());
+            setPage(1);
+        }, 280);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     useEffect(() => {
         const fetchAllServices = async () => {
             setLoading(true);
             try {
-                const res = await getServices();
+                const res = await getServices({
+                    category: selectedCategory || undefined,
+                    keyword: debouncedSearch || undefined,
+                    page,
+                    page_size: pageSize,
+                });
                 if (res.status === 200) {
-                    // El backend devuelve { items: [], total: 0, page: 1, page_size: 20 }
                     setServices(res.data.items || []);
+                    setTotal(res.data.total || 0);
+                } else {
+                    setServices([]);
+                    setTotal(0);
                 }
             } catch (err) {
                 console.error("Error fetching services:", err);
+                setServices([]);
+                setTotal(0);
             }
             setLoading(false);
         };
         fetchAllServices();
-    }, []);
+    }, [selectedCategory, debouncedSearch, page, pageSize]);
 
-    const filteredServices = services.filter(s => {
-        const safeTitle = s.title || "";
-        const safeDesc = s.description || "";
-        const query = (searchTerm || "").toLowerCase();
-        
-        const matchesSearch = safeTitle.toLowerCase().includes(query) || 
-                              safeDesc.toLowerCase().includes(query);
-        const matchesCategory = selectedCategory ? s.category === selectedCategory : true;
-        return matchesSearch && matchesCategory;
-    });
+    const totalPages = useMemo(() => {
+        return Math.max(1, Math.ceil(total / pageSize));
+    }, [total, pageSize]);
+
+    const handleCategoryClick = (category) => {
+        setSelectedCategory(category);
+        setPage(1);
+    };
+
+    const handleOpenDetail = async (service) => {
+        setRequestFeedback("");
+        setDetailOpen(true);
+        setDetailLoading(true);
+        setSelectedService(service);
+
+        try {
+            const res = await getServiceById(service.id);
+            if (res.status === 200) {
+                setSelectedService(res.data);
+            }
+        } finally {
+            setDetailLoading(false);
+        }
+    };
+
+    const handleRequestService = async () => {
+        if (!selectedService) return;
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        setRequestLoading(true);
+        setRequestFeedback("");
+        try {
+            const res = await createRequest(token, { service_id: selectedService.id });
+            if (res.status === 200 || res.status === 201) {
+                setRequestFeedback("Request sent successfully.");
+            } else {
+                setRequestFeedback(res.data?.detail || "Could not send request.");
+            }
+        } catch {
+            setRequestFeedback("Connection error while sending request.");
+        } finally {
+            setRequestLoading(false);
+        }
+    };
 
     return (
         <div className="marketplace-container">
             {/* HERO SEARCH SECTION */}
             <div className="marketplace-hero">
                 <div className="hero-background"></div>
-                <h1 className="hero-title">Encuentra tu <em>servicio ideal</em></h1>
-                <p className="hero-subtitle">Explora los servicios ofrecidos por nuestra comunidad en TimeBank.</p>
+                <h1 className="hero-title">Find your <em>ideal service</em></h1>
+                <p className="hero-subtitle">Explore the services offered by our community on TimeBank.</p>
                 
                 <div className="main-search-bar">
                     <Search className="search-icon-large" size={18} />
                     <input 
                         type="text" 
-                        placeholder="Buscar por título o descripción..."
+                        placeholder="Search by title or description..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -74,7 +160,7 @@ export default function MarketplaceSection() {
                 <div className="categories-carousel">
                     <button 
                         className={`cat-pill ${selectedCategory === "" ? "active" : ""}`}
-                        onClick={() => setSelectedCategory("")}
+                        onClick={() => handleCategoryClick("")}
                     >
                         <Star size={16} className="cat-icon" />
                         <span>All</span>
@@ -83,7 +169,7 @@ export default function MarketplaceSection() {
                         <button 
                             key={cat.label} 
                             className={`cat-pill ${selectedCategory === cat.label ? "active" : ""}`}
-                            onClick={() => setSelectedCategory(cat.label)}
+                            onClick={() => handleCategoryClick(cat.label)}
                         >
                             <cat.icon size={16} className="cat-icon" />
                             <span>{cat.label}</span>
@@ -96,25 +182,25 @@ export default function MarketplaceSection() {
             <div className="marketplace-content">
                 <div className="section-header-row">
                     <h2 className="section-title">
-                        {selectedCategory ? `Servicios de ${selectedCategory}` : "Servicios Destacados"}
+                        {selectedCategory ? `Services in ${selectedCategory}` : "Featured Services"}
                     </h2>
-                    <span className="results-count">{filteredServices.length} resultados</span>
+                    <span className="results-count">{total} results</span>
                 </div>
 
                 {loading ? (
                     <div className="loading-state">
                         <div className="spinner"></div>
-                        <p>Loading servicios...</p>
+                        <p>Loading services...</p>
                     </div>
-                ) : filteredServices.length === 0 ? (
+                ) : services.length === 0 ? (
                     <div className="empty-state">
                         <Search size={48} className="empty-icon" />
-                        <h3>No se encontraron servicios</h3>
-                        <p>Intenta con otros términos de búsqueda o categorías.</p>
+                        <h3>No services found</h3>
+                        <p>Try other search terms or categories.</p>
                     </div>
                 ) : (
                     <div className="service-grid">
-                        {filteredServices.map(service => (
+                        {services.map(service => (
                             <div key={service.id} className="service-card-ui">
                                 <div className="service-card-image">
                                     {/* Placeholder image representation */}
@@ -126,15 +212,19 @@ export default function MarketplaceSection() {
                                 <div className="service-card-body">
                                     <div className="provider-info">
                                         <div className="provider-avatar">
-                                            {service.provider_id}
+                                            {(service.provider?.first_name || "U").charAt(0)}
                                         </div>
-                                        <span className="provider-name">Proveedor #{service.provider_id}</span>
+                                        <span className="provider-name">
+                                            {service.provider
+                                                ? `${service.provider.first_name} ${service.provider.last_name}`
+                                                : `Provider #${service.provider_id}`}
+                                        </span>
                                     </div>
-                                    <h3 className="service-title">{service.title || "Sin título"}</h3>
+                                    <h3 className="service-title">{service.title || "Untitled"}</h3>
                                     <p className="service-description">
                                         {(service.description && service.description.length > 80) 
                                             ? service.description.substring(0, 80) + "..." 
-                                            : service.description || "Sin descripción"}
+                                            : service.description || "No description"}
                                     </p>
                                     
                                     <div className="service-card-footer">
@@ -142,8 +232,8 @@ export default function MarketplaceSection() {
                                             <Clock size={16} className="price-icon" />
                                             <span><strong>{service.price}</strong> TB</span>
                                         </div>
-                                        <button className="btn-solicitar">
-                                            Request <ArrowRight size={14} />
+                                        <button className="btn-solicitar" onClick={() => handleOpenDetail(service)}>
+                                            View <Eye size={14} />
                                         </button>
                                     </div>
                                 </div>
@@ -151,7 +241,64 @@ export default function MarketplaceSection() {
                         ))}
                     </div>
                 )}
+
+                <div className="pagination-wrap">
+                    <button
+                        className="btn btn-ghost pagination-btn"
+                        onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                        disabled={page <= 1 || loading}
+                    >
+                        Previous
+                    </button>
+                    <span className="pagination-label">Page {page} of {totalPages}</span>
+                    <button
+                        className="btn btn-ghost pagination-btn"
+                        onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={page >= totalPages || loading}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
+
+            {detailOpen && (
+                <div className="marketplace-modal-overlay" onClick={() => setDetailOpen(false)}>
+                    <div className="marketplace-modal-card" onClick={(event) => event.stopPropagation()}>
+                        <button className="marketplace-modal-close" onClick={() => setDetailOpen(false)}>
+                            <X size={18} />
+                        </button>
+
+                        {detailLoading ? (
+                            <p className="marketplace-modal-loading">Loading service details...</p>
+                        ) : selectedService ? (
+                            <>
+                                <h3>{selectedService.title}</h3>
+                                <p className="marketplace-modal-meta">
+                                    {selectedService.category} · {selectedService.price} TB / hr
+                                </p>
+                                <p className="marketplace-modal-description">
+                                    {selectedService.description || "No description provided."}
+                                </p>
+                                {selectedService.provider && (
+                                    <p className="marketplace-modal-provider">
+                                        Provider: {selectedService.provider.first_name} {selectedService.provider.last_name} ({selectedService.provider.email})
+                                    </p>
+                                )}
+
+                                {requestFeedback && <p className="marketplace-request-feedback">{requestFeedback}</p>}
+
+                                <button
+                                    className="btn btn-success marketplace-request-btn"
+                                    onClick={handleRequestService}
+                                    disabled={requestLoading}
+                                >
+                                    {requestLoading ? "Sending request..." : "Request Service"} <ArrowRight size={14} />
+                                </button>
+                            </>
+                        ) : null}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

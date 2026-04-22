@@ -1,96 +1,211 @@
-import { useState } from "react";
-import { getProfile, updateProfile } from "../../api/timebankApi";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getBalance, getProfile, getTransactions, transferCredits } from "../../api/timebankApi";
 import { useAuth } from "../../context/AuthContext";
-import ResponsePanel, { FormField } from "../common/ResponsePanel";
-import { User, Pencil, AlertTriangle } from "lucide-react";
+import { User, Wallet, ArrowLeftRight, RefreshCw } from "lucide-react";
+import "./ProfileSection.css";
 
-function GetProfileForm() {
+export default function ProfileSection({ onBalanceChange }) {
     const { token } = useAuth();
-    const [result, setResult] = useState(null);
+    const [profile, setProfile] = useState(null);
+    const [balance, setBalance] = useState(0);
+    const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [transferLoading, setTransferLoading] = useState(false);
+    const [transferFeedback, setTransferFeedback] = useState("");
+    const [recipient, setRecipient] = useState("");
+    const [amount, setAmount] = useState("");
 
-    const handleSubmit = async () => {
-        if (!token) {
-            setResult({ status: 401, data: { detail: "You need to login first" } });
+    const loadProfileData = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        setError("");
+
+        try {
+            const [profileRes, balanceRes, txRes] = await Promise.all([
+                getProfile(token),
+                getBalance(token),
+                getTransactions(token),
+            ]);
+
+            if (profileRes.status === 200) setProfile(profileRes.data);
+            if (balanceRes.status === 200) setBalance(balanceRes.data.balance || 0);
+            if (txRes.status === 200) setTransactions(Array.isArray(txRes.data) ? txRes.data : []);
+
+            if (profileRes.status !== 200 || balanceRes.status !== 200 || txRes.status !== 200) {
+                setError("Could not load all wallet/profile data.");
+            }
+        } catch {
+            setError("Connection error while loading profile data.");
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    useEffect(() => {
+        loadProfileData();
+    }, [loadProfileData]);
+
+    const handleTransfer = async (event) => {
+        event.preventDefault();
+        if (!token) return;
+
+        const rawRecipient = recipient.trim();
+        const parsedAmount = Number(amount);
+
+        if (!rawRecipient || !parsedAmount || parsedAmount <= 0) {
+            setTransferFeedback("Recipient and amount are required.");
             return;
         }
-        setLoading(true);
-        try {
-            const res = await getProfile(token);
-            setResult(res);
-        } catch (err) {
-            setResult({ status: 0, data: { error: err.message } });
+
+        const payload = { amount: parsedAmount };
+        if (/^\d+$/.test(rawRecipient)) {
+            payload.receiver_id = Number(rawRecipient);
+        } else {
+            payload.receiver_email = rawRecipient;
         }
-        setLoading(false);
+
+        setTransferLoading(true);
+        setTransferFeedback("");
+        try {
+            const res = await transferCredits(token, payload);
+            if (res.status === 200 || res.status === 201) {
+                setTransferFeedback("Transfer completed successfully.");
+                setRecipient("");
+                setAmount("");
+                await loadProfileData();
+                onBalanceChange?.();
+            } else {
+                setTransferFeedback(res.data?.detail || "Transfer failed.");
+            }
+        } catch {
+            setTransferFeedback("Connection error while transferring credits.");
+        } finally {
+            setTransferLoading(false);
+        }
     };
 
-    return (
-        <div className="card">
-            <h3><User size={18} /> View My Profile</h3>
-            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requires login</p>}
-            <button onClick={handleSubmit} disabled={loading || !token} className="btn">
-                {loading ? "Loading..." : "Get Profile"}
-            </button>
-            <ResponsePanel result={result} />
-        </div>
-    );
-}
+    const rows = useMemo(() => {
+        return [...transactions]
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .map((tx) => {
+            const direction = tx.sender_id === profile?.id ? "Sent" : "Received";
+            return {
+                ...tx,
+                direction,
+                type: String(tx.transaction_type || "-").toUpperCase(),
+            };
+            });
+    }, [transactions, profile?.id]);
 
-function UpdateProfileForm() {
-    const { token } = useAuth();
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [password, setPassword] = useState("");
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!token) {
-            setResult({ status: 401, data: { detail: "You need to login first" } });
-            return;
-        }
-        setLoading(true);
-        try {
-            const body = {};
-            if (firstName) body.first_name = firstName;
-            if (lastName) body.last_name = lastName;
-            if (password) body.password = password;
-
-            const res = await updateProfile(token, body);
-            setResult(res);
-        } catch (err) {
-            setResult({ status: 0, data: { error: err.message } });
-        }
-        setLoading(false);
-    };
-
-    return (
-        <div className="card">
-            <h3><Pencil size={18} /> Update Profile</h3>
-            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requires login</p>}
-            <form onSubmit={handleSubmit}>
-                <FormField label="New First Name" value={firstName} onChange={setFirstName} placeholder="(optional)" required={false} />
-                <FormField label="New Last Name" value={lastName} onChange={setLastName} placeholder="(optional)" required={false} />
-                <FormField label="New Password" type="password" value={password} onChange={setPassword} placeholder="(optional, min. 6)" required={false} />
-                <button type="submit" disabled={loading || !token} className="btn">
-                    {loading ? "Updating..." : "Update"}
-                </button>
-            </form>
-            <ResponsePanel result={result} />
-        </div>
-    );
-}
-
-export default function ProfileSection() {
-    return (
-        <div className="section">
-            <h2 className="section-title"><User size={22} /> User Profile</h2>
-            <p className="section-subtitle">Backend TimeBank — <code>localhost:8000</code> — Requiere JWT</p>
-            <div className="cards-grid">
-                <GetProfileForm />
-                <UpdateProfileForm />
+    if (!token) {
+        return (
+            <div className="section">
+                <h2 className="section-title"><User size={22} /> Profile & Wallet</h2>
+                <p className="section-subtitle">Please login to view your profile and transactions.</p>
             </div>
+        );
+    }
+
+    return (
+        <div className="section profile-wallet-section">
+            <div className="profile-wallet-header">
+                <div>
+                    <h2 className="section-title"><User size={22} /> Profile & Wallet</h2>
+                    <p className="section-subtitle">Balance, transfers, and transaction history</p>
+                </div>
+                <button className="btn btn-refresh profile-refresh-btn" onClick={loadProfileData} disabled={loading}>
+                    <RefreshCw size={14} /> {loading ? "Refreshing..." : "Refresh"}
+                </button>
+            </div>
+
+            {error && <div className="profile-wallet-error">{error}</div>}
+
+            <div className="profile-wallet-grid">
+                <article className="card">
+                    <h3><User size={18} /> Account Overview</h3>
+                    <div className="profile-summary-list">
+                        <p><strong>Name:</strong> {profile?.first_name} {profile?.last_name}</p>
+                        <p><strong>Email:</strong> {profile?.email}</p>
+                        <p><strong>Role:</strong> {String(profile?.role || "user").toUpperCase()}</p>
+                    </div>
+                    <div className="profile-balance-chip">
+                        <Wallet size={16} /> Current Balance: <strong>{Number(balance).toFixed(2)} TB</strong>
+                    </div>
+                </article>
+
+                <article className="card">
+                    <h3><ArrowLeftRight size={18} /> Transfer Credits</h3>
+                    <form onSubmit={handleTransfer} className="transfer-form">
+                        <label>
+                            Recipient ID or Email
+                            <input
+                                type="text"
+                                value={recipient}
+                                onChange={(event) => setRecipient(event.target.value)}
+                                placeholder="e.g. 5 or user@timebank.com"
+                                required
+                            />
+                        </label>
+                        <label>
+                            Amount (TB)
+                            <input
+                                type="number"
+                                step="0.1"
+                                min="0.1"
+                                value={amount}
+                                onChange={(event) => setAmount(event.target.value)}
+                                placeholder="10"
+                                required
+                            />
+                        </label>
+
+                        {transferFeedback && <p className="transfer-feedback">{transferFeedback}</p>}
+
+                        <button type="submit" className="btn btn-success" disabled={transferLoading}>
+                            {transferLoading ? "Transferring..." : "Transfer Credits"}
+                        </button>
+                    </form>
+                </article>
+            </div>
+
+            <article className="card profile-transactions-card">
+                <h3><Wallet size={18} /> Transaction History</h3>
+                <div className="tx-table-wrap">
+                    <table className="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Direction</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className="tx-empty">No transactions yet.</td>
+                                </tr>
+                            ) : (
+                                rows.map((tx) => (
+                                    <tr key={tx.id}>
+                                        <td>{tx.created_at ? new Date(tx.created_at).toLocaleString() : "-"}</td>
+                                        <td>{tx.type}</td>
+                                        <td>{tx.direction}</td>
+                                        <td>{tx.sender_id ?? "SYSTEM"}</td>
+                                        <td>{tx.receiver_id}</td>
+                                        <td>{tx.amount}</td>
+                                        <td>{tx.description || "-"}</td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
         </div>
     );
 }

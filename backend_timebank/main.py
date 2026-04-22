@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.database as db_module
+from app.database_seed import seed_default_users
 from app.controllers import (
     auth_controller,
     service_controller,
@@ -23,6 +24,12 @@ import app.models.transaction  # noqa: F401
 async def lifespan(app: FastAPI):
     """Create database tables on startup."""
     db_module.Base.metadata.create_all(bind=db_module.engine)
+
+    with db_module.SessionLocal() as db:
+        created_users = seed_default_users(db)
+        if created_users:
+            print(f"Seeded default users: {', '.join(created_users)}")
+
     yield
 
 

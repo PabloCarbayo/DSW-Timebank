@@ -30,10 +30,10 @@ export default function RegisterPage() {
         setSuccess(true);
         setTimeout(() => navigate("/login"), 1500);
       } else {
-        setError(res.data.detail || res.data.error || "Error al registrar");
+        setError(res.data.detail || res.data.error || "Error registering");
       }
     } catch {
-      setError("No se pudo conectar con el servidor");
+      setError("Could not connect to server");
     }
     setLoading(false);
   };
@@ -42,17 +42,17 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-page-bg" />
       <div className="auth-card">
-        <Link to="/" className="auth-back"><ArrowLeft size={18} /> Volver</Link>
+        <Link to="/" className="auth-back"><ArrowLeft size={18} /> Back</Link>
 
         <div className="auth-header">
           <UserPlus size={28} className="auth-header-icon" />
-          <h1 className="auth-title">Crear cuenta</h1>
-          <p className="auth-subtitle">Únete a <em>TimeBank</em> — tu tiempo vale</p>
+          <h1 className="auth-title">Create Account</h1>
+          <p className="auth-subtitle">Join <em>TimeBank</em> — your time is worth it</p>
         </div>
 
         {success ? (
           <div className="auth-success">
-            <p>¡Cuenta creada! Redirigiendo al login...</p>
+            <p>Account created! Redirecting to login...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="auth-form">

@@ -5,16 +5,16 @@ import { Plus, Edit2, Trash2, X, Check, Clock } from "lucide-react";
 import "./MyServicesSection.css";
 
 const CATEGORIES = [
-  "Programación",
-  "Diseño",
+    "Programming",
+    "Design",
   "Marketing",
-  "Escritura",
+    "Writing",
   "Video",
-  "IA",
-  "Música",
-  "Negocios",
-  "Fotografía",
-  "Educación",
+    "AI",
+    "Music",
+    "Business",
+    "Photography",
+    "Education",
 ];
 
 export function MyServicesSection() {
@@ -44,12 +44,12 @@ export function MyServicesSection() {
         try {
             const res = await getMyServices(token);
             if (res.status === 200) {
-                setServices(res.data.items || []);
+                setServices(Array.isArray(res.data) ? res.data : (res.data.items || []));
             } else {
-                setError(res.data.detail || "Error al cargar tus servicios");
+                setError(res.data.detail || "Error loading your services");
             }
         } catch (err) {
-            setError("Error de conexión al servidor");
+            setError("Connection error to the server");
         } finally {
             setLoading(false);
         }
@@ -88,7 +88,7 @@ export function MyServicesSection() {
                     fetchMyServices();
                     setIsModalOpen(false);
                 } else {
-                    alert(res.data.detail || "Error al crear servicio");
+                    alert(res.data.detail || "Error creating service");
                 }
             } else {
                 const res = await updateService(token, currentServiceId, { ...formData, price: parseFloat(formData.price) });
@@ -96,39 +96,39 @@ export function MyServicesSection() {
                     fetchMyServices();
                     setIsModalOpen(false);
                 } else {
-                    alert(res.data.detail || "Error al actualizar servicio");
+                    alert(res.data.detail || "Error updating service");
                 }
             }
         } catch (err) {
-            alert("Error de conexión al servidor");
+            alert("Connection error to the server");
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que deseas eliminar este servicio?")) return;
+        if (!window.confirm("Are you sure you want to delete this service?")) return;
         try {
             const res = await deleteService(token, id);
             if (res.status === 204 || res.status === 200) {
                 fetchMyServices();
             } else {
-                alert("Error al eliminar servicio");
+                alert("Error deleting service");
             }
         } catch (err) {
-            alert("Error de conexión al servidor");
+            alert("Connection error to the server");
         }
     };
 
-    if (loading) return <div className="loading-state">Cargando tus servicios...</div>;
+    if (loading) return <div className="loading-state">Loading your services...</div>;
 
     return (
         <div className="myservices-container fade-in">
             <header className="myservices-header">
                 <div>
-                    <h2 className="hero-title">Mis <span>Servicios</span></h2>
-                    <p className="hero-subtitle">Gestiona las ofertas que brindas a la comunidad</p>
+                    <h2 className="hero-title">My <span>Services</span></h2>
+                    <p className="hero-subtitle">Manage the offers you provide to the community</p>
                 </div>
                 <button className="btn btn-primary" onClick={() => handleOpenModal("create")} style={{ maxWidth: '200px' }}>
-                    <Plus size={20} /> Nuevo Servicio
+                    <Plus size={20} /> New Service
                 </button>
             </header>
 
@@ -138,11 +138,8 @@ export function MyServicesSection() {
                 {services.length === 0 ? (
                     <div className="empty-state glass-card">
                         <Clock size={48} />
-                        <h3>Aún no ofreces servicios</h3>
-                        <p>Comparte tus habilidades con la comunidad ganando horas.</p>
-                        <button className="btn btn-primary" onClick={() => handleOpenModal("create")} style={{ marginTop: '1rem', maxWidth: '250px' }}>
-                            <Plus size={18} /> Crear un servicio
-                        </button>
+                        <h3>You are not offering any services yet</h3>
+                        <p>Share your skills with the community. Click "New Service" at the top right to start.</p>
                     </div>
                 ) : (
                     services.map(service => (
@@ -150,7 +147,7 @@ export function MyServicesSection() {
                             <div className="card-header">
                                 <span className="cat-badge">{service.category}</span>
                                 <div className="card-actions">
-                                    <button className="icon-btn edit-btn" onClick={() => handleOpenModal("edit", service)} title="Editar">
+                                    <button className="icon-btn edit-btn" onClick={() => handleOpenModal("edit", service)} title="Edit">
                                         <Edit2 size={16} />
                                     </button>
                                     <button className="icon-btn delete-btn" onClick={() => handleDelete(service.id)} title="Delete">
@@ -167,7 +164,7 @@ export function MyServicesSection() {
                                     {service.price} TB
                                 </span>
                                 <span className={`status-tag ${service.is_active ? 'active' : 'inactive'}`}>
-                                    {service.is_active ? 'Activo' : 'Oculto'}
+                                    {service.is_active ? 'Active' : 'Hidden'}
                                 </span>
                             </div>
                         </div>
@@ -184,12 +181,12 @@ export function MyServicesSection() {
 
                         <div className="elegant-modal-header">
                             <h3 className="elegant-modal-title">
-                                {modalMode === "create" ? "Nuevo Servicio" : "Editar Servicio"}
+                                {modalMode === "create" ? "New Service" : "Edit Service"}
                             </h3>
                             <p className="elegant-modal-subtitle">
                                 {modalMode === "create" 
-                                    ? "Detalla qué habilidad ofreces a la comunidad" 
-                                    : "Actualiza los detalles de tu oferta de servicio"}
+                                    ? "Detail what skill you offer to the community" 
+                                    : "Update the details of your service offer"}
                             </p>
                         </div>
 
@@ -202,7 +199,7 @@ export function MyServicesSection() {
                                     required
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="Ej. Clases particulares de piano"
+                                    placeholder="Ex. Private piano lessons"
                                 />
                             </label>
 
@@ -218,7 +215,7 @@ export function MyServicesSection() {
                                     </select>
                                 </label>
                                 <label className="elegant-label">
-                                    Precio (TB/hr)
+                                    Price (TB/hr)
                                     <input
                                         className="elegant-input"
                                         type="number"
@@ -233,14 +230,14 @@ export function MyServicesSection() {
                             </div>
 
                             <label className="elegant-label">
-                                Description Detallada
+                                Detailed Description
                                 <textarea
                                     className="elegant-input"
                                     required
                                     rows="4"
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    placeholder="¿Qué incluye?, ¿Cuánto dura?, ¿Dónde se imparte?..."
+                                    placeholder="What is included? How long does it last? Where is it taught?..."
                                 />
                             </label>
 
@@ -251,16 +248,16 @@ export function MyServicesSection() {
                                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                 />
                                 <span className="elegant-checkbox-text">
-                                    Publicar en el marketplace <em>(visible para otros)</em>
+                                    Publish in the marketplace <em>(visible to others)</em>
                                 </span>
                             </label>
                             
                             <div className="modal-footer">
-                                <button type="button" className="btn-elegant-secondary" onClick={() => setIsModalOpen(false)}>
+                                <button type="button" className="btn btn-ghost" onClick={() => setIsModalOpen(false)}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn-elegant-primary">
-                                    <Check size={18} /> {modalMode === "create" ? "Publicar" : "Guardar Cambios"}
+                                <button type="submit" className="btn btn-success">
+                                    <Check size={18} /> {modalMode === "create" ? "Publish" : "Save Changes"}
                                 </button>
                             </div>
                         </form>

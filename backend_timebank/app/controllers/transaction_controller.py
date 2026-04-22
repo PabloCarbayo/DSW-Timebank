@@ -63,6 +63,7 @@ def transfer_credits(
     """Transfer time credits to another user."""
     return service.transfer_credits(
         sender_id=current_user.id,
-        receiver_id=data.receiver_id,
         amount=data.amount,
+        receiver_id=data.receiver_id,
+        receiver_email=data.receiver_email,
     )

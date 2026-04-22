@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class CreditPurchaseRequest(BaseModel):
@@ -14,8 +14,15 @@ class CreditPurchaseRequest(BaseModel):
 
 class CreditTransferRequest(BaseModel):
     """Schema for transferring time credits to another user."""
-    receiver_id: int
+    receiver_id: Optional[int] = None
+    receiver_email: Optional[EmailStr] = None
     amount: float = Field(..., gt=0)
+
+    @model_validator(mode="after")
+    def validate_receiver(self):
+        if self.receiver_id is None and self.receiver_email is None:
+            raise ValueError("receiver_id or receiver_email is required")
+        return self
 
 
 class TransactionResponse(BaseModel):

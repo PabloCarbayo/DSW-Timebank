@@ -90,8 +90,16 @@ export async function createService(token, data) {
     return { status: res.status, data: await res.json() };
 }
 
-export async function getServices() {
-    const res = await fetch(`${BASE}/services/`);
+export async function getServices(params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.category) searchParams.set("category", params.category);
+    if (params.keyword) searchParams.set("keyword", params.keyword);
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.page_size) searchParams.set("page_size", String(params.page_size));
+
+    const query = searchParams.toString();
+    const url = query ? `${BASE}/services/?${query}` : `${BASE}/services/`;
+    const res = await fetch(url);
     return { status: res.status, data: await res.json() };
 }
 

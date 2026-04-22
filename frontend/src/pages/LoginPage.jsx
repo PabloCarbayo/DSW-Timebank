@@ -24,10 +24,10 @@ export default function LoginPage() {
         login(res.data.access_token, email);
         navigate("/dashboard");
       } else {
-        setError(res.data.detail || res.data.error || "Credenciales incorrectas");
+        setError(res.data.detail || res.data.error || "Wrong credentials");
       }
     } catch {
-      setError("No se pudo conectar con el servidor");
+      setError("Could not connect to server");
     }
     setLoading(false);
   };
@@ -40,8 +40,8 @@ export default function LoginPage() {
 
         <div className="auth-header">
           <KeyRound size={28} className="auth-header-icon" />
-          <h1 className="auth-title">Iniciar sesión</h1>
-          <p className="auth-subtitle">Bienvenido de vuelta a <em>TimeBank</em></p>
+          <h1 className="auth-title">Login</h1>
+          <p className="auth-subtitle">Welcome back to <em>TimeBank</em></p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -51,7 +51,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder="your@email.com"
               required
               className="auth-input"
             />
@@ -64,7 +64,7 @@ export default function LoginPage() {
                 type={showPw ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tu contraseña"
+                placeholder="Your password"
                 required
                 className="auth-input"
               />
@@ -77,12 +77,12 @@ export default function LoginPage() {
           {error && <p className="auth-error">{error}</p>}
 
           <button type="submit" disabled={loading} className="auth-submit">
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         <p className="auth-footer-text">
-          ¿No tienes cuenta? <Link to="/register" className="auth-link">Regístrate</Link>
+          Don't have an account? <Link to="/register" className="auth-link">Sign up</Link>
         </p>
       </div>
     </div>

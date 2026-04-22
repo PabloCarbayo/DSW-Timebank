@@ -18,15 +18,15 @@ import "./LandingPage.css";
 
 const CATEGORIES = [
   { icon: Code, label: "Programming" },
-  { icon: Palette, label: "Diseño" },
+  { icon: Palette, label: "Design" },
   { icon: TrendingUp, label: "Marketing" },
-  { icon: PenTool, label: "Escritura" },
+  { icon: PenTool, label: "Writing" },
   { icon: Video, label: "Video" },
-  { icon: Bot, label: "IA" },
-  { icon: Music, label: "Música" },
-  { icon: Briefcase, label: "Negocios" },
-  { icon: Camera, label: "Fotografía" },
-  { icon: GraduationCap, label: "Educación" },
+  { icon: Bot, label: "AI" },
+  { icon: Music, label: "Music" },
+  { icon: Briefcase, label: "Business" },
+  { icon: Camera, label: "Photography" },
+  { icon: GraduationCap, label: "Education" },
 ];
 
 export default function LandingPage() {
@@ -48,13 +48,13 @@ export default function LandingPage() {
 
       <h2 className="landing-title">
         Find the <em>service</em><br />
-        adecuado de inmediato
+        you need, offer the <em>time</em><br />
+        you have.
       </h2>
 
       <p className="landing-slogan">
-        En <span className="accent">TimeBank</span> you can exchange your time with others.
-        Ofrece tus habilidades, encuentra las que necesitas y forma parte de
-        una comunidad donde cada minuto cuenta.
+        In <span className="accent">TimeBank</span> you can exchange your time with others.
+        Offer your skills, find the ones you need and become part of a community where every minute counts.
       </p>
 
       <div className="carousel">
