@@ -2,12 +2,65 @@ import { useState } from "react";
 import {
     registerCard,
     verifyCard,
-    processPayment,
-    topUpCard,
     getCardDetails,
 } from "../../api/paymentsApi";
+import { purchaseCredits } from "../../api/timebankApi";
+import { useAuth } from "../../context/AuthContext";
 import ResponsePanel, { FormField } from "../common/ResponsePanel";
-import { CreditCard, ShieldCheck, SendHorizonal, WalletMinimal, Search } from "lucide-react";
+import { CreditCard, ShieldCheck, Search, Wallet, AlertTriangle } from "lucide-react";
+
+function BuyCreditsForm({ onBalanceChange }) {
+    const { token } = useAuth();
+    const [number, setNumber] = useState("");
+    const [expiry, setExpiry] = useState("");
+    const [cvc, setCvc] = useState("");
+    const [amount, setAmount] = useState("");
+    const [result, setResult] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (!token) {
+            setResult({ status: 401, data: { detail: "Requires login" } });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await purchaseCredits(token, {
+                card_number: number,
+                expiration_date: expiry,
+                cvc,
+                amount: Number(amount),
+            });
+            setResult(res);
+            if (res.status === 200 || res.status === 201) {
+                setAmount("");
+                onBalanceChange?.();
+            }
+        } catch (err) {
+            setResult({ status: 0, data: { error: err.message } });
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="card">
+            <h3><Wallet size={18} /> Buy Time Credits</h3>
+            {!token && <p className="info-text muted"><AlertTriangle size={14} /> Requires login</p>}
+            <form onSubmit={handleSubmit}>
+                <FormField label="Card Number" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Expiration (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
+                <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
+                <FormField label="Amount (TB)" type="number" value={amount} onChange={setAmount} placeholder="40" />
+                <button type="submit" disabled={loading || !token} className="btn btn-success">
+                    {loading ? "Purchasing..." : "Purchase Credits"}
+                </button>
+            </form>
+            <ResponsePanel result={result} />
+        </div>
+    );
+}
 
 function CardRegisterForm() {
     const [name, setName] = useState("");
@@ -18,8 +71,8 @@ function CardRegisterForm() {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         setLoading(true);
         try {
             const res = await registerCard({
@@ -38,15 +91,15 @@ function CardRegisterForm() {
 
     return (
         <div className="card">
-            <h3><CreditCard size={18} /> Registrar Tarjeta</h3>
+            <h3><CreditCard size={18} /> Register Card</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Titular" value={name} onChange={setName} placeholder="John Doe" />
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
-                <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
+                <FormField label="Cardholder" value={name} onChange={setName} placeholder="John Doe" />
+                <FormField label="Card Number" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Expiration (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
-                <FormField label="Saldo inicial (€)" type="number" value={balance} onChange={setBalance} placeholder="100" />
+                <FormField label="Initial Balance" type="number" value={balance} onChange={setBalance} placeholder="100" />
                 <button type="submit" disabled={loading} className="btn">
-                    {loading ? "Registrando..." : "Registrar Tarjeta"}
+                    {loading ? "Registering..." : "Register Card"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -61,8 +114,8 @@ function CardVerifyForm() {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         setLoading(true);
         try {
             const res = await verifyCard({
@@ -79,97 +132,13 @@ function CardVerifyForm() {
 
     return (
         <div className="card">
-            <h3><ShieldCheck size={18} /> Verificar Tarjeta</h3>
+            <h3><ShieldCheck size={18} /> Verify Card</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
-                <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
+                <FormField label="Card Number" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <FormField label="Expiration (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
                 <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
                 <button type="submit" disabled={loading} className="btn">
-                    {loading ? "Verificando..." : "Verificar"}
-                </button>
-            </form>
-            <ResponsePanel result={result} />
-        </div>
-    );
-}
-
-function CardPayForm() {
-    const [number, setNumber] = useState("");
-    const [expiry, setExpiry] = useState("");
-    const [cvc, setCvc] = useState("");
-    const [amount, setAmount] = useState("");
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const res = await processPayment({
-                card_number: number,
-                expiration_date: expiry,
-                cvc,
-                amount: parseFloat(amount),
-            });
-            setResult(res);
-        } catch (err) {
-            setResult({ status: 0, data: { error: err.message } });
-        }
-        setLoading(false);
-    };
-
-    return (
-        <div className="card">
-            <h3><SendHorizonal size={18} /> Realizar Pago</h3>
-            <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
-                <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
-                <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
-                <FormField label="Importe (€)" type="number" value={amount} onChange={setAmount} placeholder="40.00" />
-                <button type="submit" disabled={loading} className="btn btn-danger">
-                    {loading ? "Procesando..." : "Pagar"}
-                </button>
-            </form>
-            <ResponsePanel result={result} />
-        </div>
-    );
-}
-
-function CardTopUpForm() {
-    const [number, setNumber] = useState("");
-    const [expiry, setExpiry] = useState("");
-    const [cvc, setCvc] = useState("");
-    const [amount, setAmount] = useState("");
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const res = await topUpCard({
-                card_number: number,
-                expiration_date: expiry,
-                cvc,
-                amount: parseFloat(amount),
-            });
-            setResult(res);
-        } catch (err) {
-            setResult({ status: 0, data: { error: err.message } });
-        }
-        setLoading(false);
-    };
-
-    return (
-        <div className="card">
-            <h3><WalletMinimal size={18} /> Recargar Saldo</h3>
-            <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
-                <FormField label="Caducidad (MM/YY)" value={expiry} onChange={setExpiry} placeholder="12/28" />
-                <FormField label="CVC" value={cvc} onChange={setCvc} placeholder="123" />
-                <FormField label="Importe (€)" type="number" value={amount} onChange={setAmount} placeholder="50.00" />
-                <button type="submit" disabled={loading} className="btn btn-success">
-                    {loading ? "Recargando..." : "Recargar"}
+                    {loading ? "Verifying..." : "Verify"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -182,8 +151,8 @@ function CardLookupForm() {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         setLoading(true);
         try {
             const res = await getCardDetails(number);
@@ -196,11 +165,11 @@ function CardLookupForm() {
 
     return (
         <div className="card">
-            <h3><Search size={18} /> Consultar Tarjeta</h3>
+            <h3><Search size={18} /> Card Lookup</h3>
             <form onSubmit={handleSubmit}>
-                <FormField label="Número de tarjeta" value={number} onChange={setNumber} placeholder="1234567812345678" />
-                <button type="submit" disabled={loading} className="btn">
-                    {loading ? "Buscando..." : "Consultar"}
+                <FormField label="Card Number" value={number} onChange={setNumber} placeholder="1234567812345678" />
+                <button type="submit" disabled={loading} className="btn btn-ghost">
+                    {loading ? "Searching..." : "Lookup Card"}
                 </button>
             </form>
             <ResponsePanel result={result} />
@@ -208,16 +177,15 @@ function CardLookupForm() {
     );
 }
 
-export default function CardsSection() {
+export default function CardsSection({ onBalanceChange }) {
     return (
         <div className="section">
-            <h2 className="section-title"><CreditCard size={22} /> Pasarela de Pagos</h2>
-            <p className="section-subtitle">Backend Payments — <code>localhost:8001</code></p>
+            <h2 className="section-title"><CreditCard size={22} /> Payments & Wallet</h2>
+            <p className="section-subtitle">Purchase credits and manage cards</p>
             <div className="cards-grid">
+                <BuyCreditsForm onBalanceChange={onBalanceChange} />
                 <CardRegisterForm />
                 <CardVerifyForm />
-                <CardPayForm />
-                <CardTopUpForm />
                 <CardLookupForm />
             </div>
         </div>

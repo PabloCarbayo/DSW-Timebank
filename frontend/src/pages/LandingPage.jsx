@@ -17,16 +17,16 @@ import {
 import "./LandingPage.css";
 
 const CATEGORIES = [
-  { icon: Code, label: "Programación" },
-  { icon: Palette, label: "Diseño" },
+  { icon: Code, label: "Programming" },
+  { icon: Palette, label: "Design" },
   { icon: TrendingUp, label: "Marketing" },
-  { icon: PenTool, label: "Escritura" },
+  { icon: PenTool, label: "Writing" },
   { icon: Video, label: "Video" },
-  { icon: Bot, label: "IA" },
-  { icon: Music, label: "Música" },
-  { icon: Briefcase, label: "Negocios" },
-  { icon: Camera, label: "Fotografía" },
-  { icon: GraduationCap, label: "Educación" },
+  { icon: Bot, label: "AI" },
+  { icon: Music, label: "Music" },
+  { icon: Briefcase, label: "Business" },
+  { icon: Camera, label: "Photography" },
+  { icon: GraduationCap, label: "Education" },
 ];
 
 export default function LandingPage() {
@@ -47,18 +47,18 @@ export default function LandingPage() {
       <h1 className="landing-brand"><em>TimeBank</em></h1>
 
       <h2 className="landing-title">
-        Encuentra el <em>servicio</em><br />
-        adecuado de inmediato
+        Find the <em>service</em><br />
+        you need, offer the <em>time</em><br />
+        you have.
       </h2>
 
       <p className="landing-slogan">
-        En <span className="accent">TimeBank</span> puedes intercambiar tu tiempo por el de otros.
-        Ofrece tus habilidades, encuentra las que necesitas y forma parte de
-        una comunidad donde cada minuto cuenta.
+        In <span className="accent">TimeBank</span> you can exchange your time with others.
+        Offer your skills, find the ones you need and become part of a community where every minute counts.
       </p>
 
       <div className="carousel">
-        <button className="carousel-btn" onClick={() => scroll("left")} aria-label="Anterior">
+        <button className="carousel-btn" onClick={() => scroll("left")} aria-label="Previous">
           <ChevronLeft size={22} />
         </button>
         <div className="carousel-track" ref={scrollRef}>
@@ -71,7 +71,7 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
-        <button className="carousel-btn" onClick={() => scroll("right")} aria-label="Siguiente">
+        <button className="carousel-btn" onClick={() => scroll("right")} aria-label="Next">
           <ChevronRight size={22} />
         </button>
       </div>

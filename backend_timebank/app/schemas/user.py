@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -25,6 +25,12 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=6)
 
 
+class AdminUserUpdate(BaseModel):
+    """Schema for admin-level user updates (role, active status)."""
+    role: Optional[str] = Field(None, pattern=r"^(user|admin)$")
+    is_active: Optional[bool] = None
+
+
 class UserResponse(BaseModel):
     """Schema for user data in API responses."""
     id: int
@@ -33,6 +39,7 @@ class UserResponse(BaseModel):
     last_name: str
     role: str
     is_active: bool
+    balance: float
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -42,3 +49,4 @@ class TokenResponse(BaseModel):
     """Schema for JWT token response after login."""
     access_token: str
     token_type: str = "bearer"
+

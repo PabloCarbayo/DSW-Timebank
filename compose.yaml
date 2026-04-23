@@ -40,6 +40,11 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: "mysql+pymysql://root:root@mysql:3306/timebank"
+      SEED_DEFAULT_USERS: "true"
+      DEFAULT_ADMIN_EMAIL: "admin@timebank.com"
+      DEFAULT_ADMIN_PASSWORD: "admin123"
+      DEFAULT_USER_EMAIL: "user@timebank.com"
+      DEFAULT_USER_PASSWORD: "user123"
     depends_on:
       mysql:
         condition: service_healthy
