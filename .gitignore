@@ -11,3 +11,6 @@ __pycache__/
 .pytest*/
 
 clean.sh
+
+diagramas/
+out/

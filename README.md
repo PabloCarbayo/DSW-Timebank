@@ -62,9 +62,11 @@ Make sure you have a MySQL server running on port `3306`. You must manually crea
 
 ---
 
-## 3. Application User Guide (Sprint 1 Features)
+## 3. Application User Guide
 
-Once you have the application running in your browser ([http://localhost:5173](http://localhost:5173)), you'll be ready to interact with the platform. These are the functionalities covered in Sprint 1:
+Once you have the application running in your browser ([http://localhost:5173](http://localhost:5173)), you'll be ready to interact with the platform.
+
+### Sprint 1 Features
 
 ### 3.1. Accessing the platform (Home)
 Upon loading the page, you will see the **Time Bank** Landing Page. You will have the option to **Log in** or **Sign up** from the top navigation menu.
@@ -92,6 +94,34 @@ The heart of your account. After logging in, you will see a top navigation panel
 It is important to always log out securely:
 1. Click on the **Logout** button or your user menu.
 2. The platform will clear your session and redirect you to the home page so no one else can manipulate your data.
+
+### Sprint 2 Features
+
+### 3.6. Marketplace
+The **Marketplace** is where you can discover services offered by other users in the community.
+1. Navigate to the **Marketplace** tab from the main menu.
+2. Explore the available services.
+3. If you find a service you need, you can initiate a request directly from the service card.
+
+### 3.7. My Services
+In the **My Services** section, you can create and manage the services you want to offer.
+1. Go to the **My Services** section.
+2. Click on the button to add a new service. Fill in the **Title**, **Description**, and **Time Cost** (in hours).
+3. You can edit the details of your services or delete them if you no longer wish to offer them to the marketplace.
+
+### 3.8. Service Requests
+In the **Requests** section, you can manage both your incoming and outgoing service requests.
+- **Received Requests:** When someone requests a service from you, it appears here. You have the option to **Accept** or **Reject** the request.
+- **Sent Requests:** Track the status (pending, accepted, etc.) of the services you have requested from others.
+
+### 3.9. Time Balance and Transactions
+Your **Time Balance** is the core currency of the platform.
+- Your current available time is displayed on your dashboard.
+- When an exchange is agreed upon and accepted, a transaction is automatically processed by the system.
+- The corresponding time cost is deducted from the requester's balance and credited to the provider's balance.
+
+### 3.10. User Profile
+Access your **Profile Section** to view your account details, personal information, and keep track of your overall stats in the platform.
 
 ---
 
