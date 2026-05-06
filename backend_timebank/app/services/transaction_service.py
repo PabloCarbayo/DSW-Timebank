@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-import httpx
+import stripe
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -9,8 +9,9 @@ from app.models.transaction import Transaction, TransactionType
 from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.user_repository import UserRepository
 
-PAYMENT_GATEWAY_URL = os.getenv("PAYMENT_GATEWAY_URL", "http://localhost:8001")
-
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+stripe.api_key = os.getenv("STRIPE_API_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 class TransactionService:
     def __init__(self, db: Session):
@@ -22,55 +23,70 @@ class TransactionService:
         """Return the full transaction history for a user."""
         return self.transaction_repository.get_by_user(user_id)
 
-    def purchase_credits(
-        self,
-        user_id: int,
-        card_number: str,
-        expiration_date: str,
-        cvc: str,
-        amount: float,
-    ) -> Transaction:
-        """Purchase time credits by charging the payment gateway.
-        On success, credits the user balance and records the transaction."""
-        payment_response = httpx.post(
-            f"{PAYMENT_GATEWAY_URL}/api/v1/cards/pay",
-            json={
-                "card_number": card_number,
-                "expiration_date": expiration_date,
-                "cvc": cvc,
-                "amount": amount,
-            },
-            timeout=10.0,
-        )
-
-        if payment_response.status_code == 401:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid card details",
+    def purchase_credits(self, user_id: int, amount: float) -> str:
+        """Create a Stripe Checkout Session to purchase time credits.
+        Returns the Stripe Checkout URL."""
+        try:
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "eur",
+                            "product_data": {
+                                "name": "Time Credits",
+                                "description": f"{amount} time credits",
+                            },
+                            "unit_amount": int(amount * 100),  # Amount in cents
+                        },
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
+                success_url=f"{FRONTEND_URL}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+                cancel_url=f"{FRONTEND_URL}/payment-cancelled",
+                client_reference_id=str(user_id),
+                metadata={"amount": amount},
             )
-        if payment_response.status_code == 402:
+            return session.url
+        except Exception as e:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Insufficient card funds",
-            )
-        if payment_response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Payment gateway error",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e),
             )
 
-        user = self.user_repository.get_by_id(user_id)
-        user.balance += amount
-        self.user_repository.update(user)
+    def process_stripe_webhook(self, payload: bytes, sig_header: str):
+        """Process the Stripe webhook event."""
+        if not STRIPE_WEBHOOK_SECRET:
+            raise HTTPException(status_code=500, detail="Stripe webhook secret not configured")
 
-        transaction = Transaction(
-            sender_id=None,
-            receiver_id=user_id,
-            amount=amount,
-            transaction_type=TransactionType.CREDIT_PURCHASE,
-            description=f"Purchased {amount} time credits via card ending in {card_number[-4:]}",
-        )
-        return self.transaction_repository.create(transaction)
+        try:
+            event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail="Invalid payload")
+        except stripe.error.SignatureVerificationError as e:
+            raise HTTPException(status_code=400, detail="Invalid signature")
+
+        if event["type"] == "checkout.session.completed":
+            session = event["data"]["object"]
+            user_id = int(session.get("client_reference_id"))
+            amount = float(session.get("metadata").get("amount"))
+
+            user = self.user_repository.get_by_id(user_id)
+            if user:
+                user.balance += amount
+                self.user_repository.update(user)
+
+                transaction = Transaction(
+                    sender_id=None,
+                    receiver_id=user_id,
+                    amount=amount,
+                    transaction_type=TransactionType.CREDIT_PURCHASE,
+                    description=f"Purchased {amount} time credits via Stripe",
+                )
+                self.transaction_repository.create(transaction)
+
+        return {"status": "success"}
 
     def transfer_credits(
         self,

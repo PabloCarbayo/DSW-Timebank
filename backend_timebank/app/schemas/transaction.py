@@ -5,11 +5,13 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class CreditPurchaseRequest(BaseModel):
-    """Schema for buying time credits via the payment gateway."""
-    card_number: str
-    expiration_date: str = Field(..., pattern=r"^(0[1-9]|1[0-2])\/\d{2}$")
-    cvc: str = Field(..., min_length=3, max_length=4)
+    """Schema for buying time credits via Stripe."""
     amount: float = Field(..., gt=0)
+
+
+class CheckoutSessionResponse(BaseModel):
+    """Schema for returning the Stripe Checkout URL."""
+    checkout_url: str
 
 
 class CreditTransferRequest(BaseModel):

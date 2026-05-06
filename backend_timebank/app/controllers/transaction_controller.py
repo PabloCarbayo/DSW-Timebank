@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.transaction import (
     BalanceResponse,
+    CheckoutSessionResponse,
     CreditPurchaseRequest,
     CreditTransferRequest,
     TransactionResponse,
@@ -38,20 +39,31 @@ def get_my_balance(
     return BalanceResponse(user_id=current_user.id, balance=current_user.balance)
 
 
-@router.post("/purchase", response_model=TransactionResponse)
+@router.post("/purchase", response_model=CheckoutSessionResponse)
 def purchase_credits(
     data: CreditPurchaseRequest,
     current_user: User = Depends(get_current_user),
     service: TransactionService = Depends(get_transaction_service),
 ):
-    """Purchase time credits using a card via the payment gateway."""
-    return service.purchase_credits(
+    """Purchase time credits via Stripe Checkout."""
+    url = service.purchase_credits(
         user_id=current_user.id,
-        card_number=data.card_number,
-        expiration_date=data.expiration_date,
-        cvc=data.cvc,
         amount=data.amount,
     )
+    return CheckoutSessionResponse(checkout_url=url)
+
+
+from fastapi import Request
+
+@router.post("/webhook")
+async def stripe_webhook(
+    request: Request,
+    service: TransactionService = Depends(get_transaction_service),
+):
+    """Handle Stripe webhooks."""
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    return service.process_stripe_webhook(payload, sig_header)
 
 
 @router.post("/transfer", response_model=TransactionResponse)

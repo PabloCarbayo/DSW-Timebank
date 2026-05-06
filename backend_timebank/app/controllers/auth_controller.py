@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.schemas.auth import ForgotPasswordRequest, ResetPasswordRequest
 from app.schemas.user import TokenResponse, UserLogin, UserRegister, UserResponse
 from app.services.auth_service import AuthService
 
@@ -35,3 +36,23 @@ def login(
 def logout():
     """Log out. In stateless JWT, the client discards the token."""
     return {"message": "Successfully logged out"}
+
+
+@router.post("/forgot-password")
+def forgot_password(
+    request: ForgotPasswordRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    """Request a password reset link."""
+    service.forgot_password(request)
+    return {"message": "If that email exists, a password reset link has been sent."}
+
+
+@router.post("/reset-password")
+def reset_password(
+    request: ResetPasswordRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    """Reset password using a token."""
+    service.reset_password(request)
+    return {"message": "Password successfully reset."}

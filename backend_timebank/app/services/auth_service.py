@@ -1,11 +1,13 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.auth.jwt_handler import create_access_token
+from app.auth.jwt_handler import create_access_token, verify_token
 from app.auth.password import hash_password, verify_password
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserLogin, UserRegister
+from app.schemas.auth import ForgotPasswordRequest, ResetPasswordRequest
+from app.services.email_service import send_password_reset_email
 
 
 class AuthService:
@@ -44,3 +46,40 @@ class AuthService:
 
         access_token = create_access_token(data={"sub": str(user.id)})
         return access_token
+
+    def forgot_password(self, request: ForgotPasswordRequest) -> None:
+        """Generate a password reset token and send an email."""
+        user = self.repository.get_by_email(request.email)
+        if not user:
+            # Do not throw error to prevent email enumeration, just return silently
+            return
+            
+        token = create_access_token(data={"sub": str(user.id), "purpose": "password_reset"})
+        send_password_reset_email(user.email, token)
+
+    def reset_password(self, request: ResetPasswordRequest) -> None:
+        """Verify token and reset password."""
+        payload = verify_token(request.token)
+        if payload.get("purpose") != "password_reset":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token purpose",
+            )
+            
+        sub = payload.get("sub")
+        if sub is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token payload",
+            )
+
+        user_id = int(sub)
+        user = self.repository.get_by_id(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
+        user.hashed_password = hash_password(request.new_password)
+        self.repository.update(user)
