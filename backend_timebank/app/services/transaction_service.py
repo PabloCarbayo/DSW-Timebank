@@ -10,7 +10,7 @@ from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.user_repository import UserRepository
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-stripe.api_key = os.getenv("STRIPE_API_KEY")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 class TransactionService:

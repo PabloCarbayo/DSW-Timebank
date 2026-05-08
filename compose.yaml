@@ -45,6 +45,10 @@ services:
       DEFAULT_ADMIN_PASSWORD: "admin123"
       DEFAULT_USER_EMAIL: "user@timebank.com"
       DEFAULT_USER_PASSWORD: "user123"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_PUBLISHABLE_KEY: "${STRIPE_PUBLISHABLE_KEY}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      FRONTEND_URL: "http://localhost:5173"
     depends_on:
       mysql:
         condition: service_healthy

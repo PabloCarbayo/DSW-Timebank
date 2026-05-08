@@ -31,7 +31,9 @@ class TransactionResponse(BaseModel):
     """Schema for transaction data in API responses."""
     id: int
     sender_id: Optional[int]
+    sender_name: Optional[str] = None
     receiver_id: int
+    receiver_name: Optional[str] = None
     amount: float
     transaction_type: str
     service_request_id: Optional[int]

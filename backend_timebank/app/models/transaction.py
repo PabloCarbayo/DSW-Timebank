@@ -28,3 +28,15 @@ class Transaction(Base):
     sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_transactions")
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_transactions")
     service_request = relationship("ServiceRequest", back_populates="transaction")
+
+    @property
+    def sender_name(self) -> str | None:
+        if self.sender:
+            return f"{self.sender.first_name} {self.sender.last_name}"
+        return None
+
+    @property
+    def receiver_name(self) -> str | None:
+        if self.receiver:
+            return f"{self.receiver.first_name} {self.receiver.last_name}"
+        return None

@@ -195,8 +195,8 @@ export default function ProfileSection({ onBalanceChange }) {
                                         <td>{tx.created_at ? new Date(tx.created_at).toLocaleString() : "-"}</td>
                                         <td>{tx.type}</td>
                                         <td>{tx.direction}</td>
-                                        <td>{tx.sender_id ?? "SYSTEM"}</td>
-                                        <td>{tx.receiver_id}</td>
+                                        <td>{tx.sender_name ?? tx.sender_id ?? "SYSTEM"}</td>
+                                        <td>{tx.receiver_name ?? tx.receiver_id}</td>
                                         <td>{tx.amount}</td>
                                         <td>{tx.description || "-"}</td>
                                     </tr>
