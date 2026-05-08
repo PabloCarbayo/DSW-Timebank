@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getMyServices, createService, updateService, deleteService } from "../../api/timebankApi";
 import { useAuth } from "../../context/AuthContext";
-import { Plus, Edit2, Trash2, X, Check, Clock } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Check, Clock, Star } from "lucide-react";
+import FeedbackModal from "../common/FeedbackModal";
 import "./MyServicesSection.css";
 
 const CATEGORIES = [
@@ -27,6 +28,18 @@ export function MyServicesSection() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState("create"); // 'create' | 'edit'
     const [currentServiceId, setCurrentServiceId] = useState(null);
+    const [feedbackModal, setFeedbackModal] = useState({ isOpen: false });
+
+    const showFeedback = (title, message, variant = "info") => {
+        setFeedbackModal({
+            isOpen: true,
+            title,
+            message,
+            type: "alert",
+            variant,
+            onConfirm: () => setFeedbackModal({ isOpen: false })
+        });
+    };
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -88,7 +101,7 @@ export function MyServicesSection() {
                     fetchMyServices();
                     setIsModalOpen(false);
                 } else {
-                    alert(res.data.detail || "Error creating service");
+                    showFeedback("Error", res.data.detail || "Error creating service", "error");
                 }
             } else {
                 const res = await updateService(token, currentServiceId, { ...formData, price: parseFloat(formData.price) });
@@ -96,32 +109,48 @@ export function MyServicesSection() {
                     fetchMyServices();
                     setIsModalOpen(false);
                 } else {
-                    alert(res.data.detail || "Error updating service");
+                    showFeedback("Error", res.data.detail || "Error updating service", "error");
                 }
             }
         } catch (err) {
-            alert("Connection error to the server");
+            showFeedback("Error", "Connection error to the server", "error");
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this service?")) return;
+    const executeDelete = async (id) => {
         try {
             const res = await deleteService(token, id);
             if (res.status === 204 || res.status === 200) {
                 fetchMyServices();
             } else {
-                alert("Error deleting service");
+                showFeedback("Error", "Error deleting service", "error");
             }
         } catch (err) {
-            alert("Connection error to the server");
+            showFeedback("Error", "Connection error to the server", "error");
         }
+    };
+
+    const handleDelete = (id) => {
+        setFeedbackModal({
+            isOpen: true,
+            title: "Delete Service",
+            message: "Are you sure you want to delete this service?",
+            type: "confirm",
+            variant: "warning",
+            onConfirm: () => {
+                setFeedbackModal({ isOpen: false });
+                executeDelete(id);
+            },
+            onCancel: () => setFeedbackModal({ isOpen: false })
+        });
     };
 
     if (loading) return <div className="loading-state">Loading your services...</div>;
 
     return (
         <div className="myservices-container fade-in">
+            <FeedbackModal {...feedbackModal} />
+            
             <header className="myservices-header">
                 <div>
                     <h2 className="hero-title">My <span>Services</span></h2>
@@ -146,6 +175,12 @@ export function MyServicesSection() {
                         <div key={service.id} className="service-card">
                             <div className="card-header">
                                 <span className="cat-badge">{service.category}</span>
+                                {service.average_rating != null && (
+                                    <span style={{ display: "flex", alignItems: "center", marginLeft: "10px", color: "var(--warning-color)", fontWeight: "bold", fontSize: "0.85rem" }}>
+                                        <Star size={14} style={{ fill: "currentColor", marginRight: "2px" }} />
+                                        {service.average_rating} ({service.review_count})
+                                    </span>
+                                )}
                                 <div className="card-actions">
                                     <button className="icon-btn edit-btn" onClick={() => handleOpenModal("edit", service)} title="Edit">
                                         <Edit2 size={16} />

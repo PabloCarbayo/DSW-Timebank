@@ -23,6 +23,10 @@ class TransactionService:
         """Return the full transaction history for a user."""
         return self.transaction_repository.get_by_user(user_id)
 
+    def get_all_transactions(self) -> List[Transaction]:
+        """Return all transactions in the system (Admin only)."""
+        return self.transaction_repository.get_all()
+
     def purchase_credits(self, user_id: int, amount: float) -> str:
         """Create a Stripe Checkout Session to purchase time credits.
         Returns the Stripe Checkout URL."""

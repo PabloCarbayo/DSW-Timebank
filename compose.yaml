@@ -48,6 +48,8 @@ services:
       STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
       STRIPE_PUBLISHABLE_KEY: "${STRIPE_PUBLISHABLE_KEY}"
       STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      SMTP_EMAIL: "${SMTP_EMAIL}"
+      SMTP_PASSWORD: "${GMAIL_APP_PWD}"
       FRONTEND_URL: "http://localhost:5173"
     depends_on:
       mysql:

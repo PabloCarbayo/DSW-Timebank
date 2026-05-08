@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getBalance, getProfile, getTransactions, transferCredits } from "../../api/timebankApi";
+import { getBalance, getProfile, getTransactions, transferCredits, getIncomingRequests } from "../../api/timebankApi";
 import { useAuth } from "../../context/AuthContext";
-import { User, Wallet, ArrowLeftRight, RefreshCw } from "lucide-react";
+import { User, Wallet, ArrowLeftRight, RefreshCw, Star, MessageSquare } from "lucide-react";
 import "./ProfileSection.css";
 
 export default function ProfileSection({ onBalanceChange }) {
@@ -15,6 +15,7 @@ export default function ProfileSection({ onBalanceChange }) {
     const [transferFeedback, setTransferFeedback] = useState("");
     const [recipient, setRecipient] = useState("");
     const [amount, setAmount] = useState("");
+    const [reviews, setReviews] = useState([]);
 
     const loadProfileData = useCallback(async () => {
         if (!token) return;
@@ -22,15 +23,21 @@ export default function ProfileSection({ onBalanceChange }) {
         setError("");
 
         try {
-            const [profileRes, balanceRes, txRes] = await Promise.all([
+            const [profileRes, balanceRes, txRes, reqsRes] = await Promise.all([
                 getProfile(token),
                 getBalance(token),
                 getTransactions(token),
+                getIncomingRequests(token),
             ]);
 
             if (profileRes.status === 200) setProfile(profileRes.data);
             if (balanceRes.status === 200) setBalance(balanceRes.data.balance || 0);
             if (txRes.status === 200) setTransactions(Array.isArray(txRes.data) ? txRes.data : []);
+            
+            if (reqsRes.status === 200) {
+                const completedReviews = (reqsRes.data || []).filter(r => r.status === "completed" && r.rating != null);
+                setReviews(completedReviews);
+            }
 
             if (profileRes.status !== 200 || balanceRes.status !== 200 || txRes.status !== 200) {
                 setError("Could not load all wallet/profile data.");
@@ -128,6 +135,17 @@ export default function ProfileSection({ onBalanceChange }) {
                         <p><strong>Name:</strong> {profile?.first_name} {profile?.last_name}</p>
                         <p><strong>Email:</strong> {profile?.email}</p>
                         <p><strong>Role:</strong> {String(profile?.role || "user").toUpperCase()}</p>
+                        <p style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <strong>Reputation:</strong>
+                            {profile?.review_count > 0 ? (
+                                <>
+                                    <Star size={16} fill="var(--warning-color)" color="var(--warning-color)" />
+                                    <span>{profile.average_rating} ({profile.review_count} reviews)</span>
+                                </>
+                            ) : (
+                                <span className="muted-text">No reviews yet</span>
+                            )}
+                        </p>
                     </div>
                     <div className="profile-balance-chip">
                         <Wallet size={16} /> Current Balance: <strong>{Number(balance).toFixed(2)} TB</strong>
@@ -204,6 +222,34 @@ export default function ProfileSection({ onBalanceChange }) {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </article>
+
+            <article className="card profile-transactions-card" style={{ marginTop: "20px" }}>
+                <h3><MessageSquare size={18} /> My Received Reviews</h3>
+                <div className="reviews-list" style={{ marginTop: "15px" }}>
+                    {reviews.length === 0 ? (
+                        <p className="muted-text text-center">You haven't received any reviews yet.</p>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {reviews.map(r => (
+                                <div key={r.id} style={{ padding: '15px', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <Star size={16} fill="var(--warning-color)" color="var(--warning-color)" />
+                                            <strong>{r.rating}.0</strong>
+                                        </div>
+                                        <span className="muted-text" style={{ fontSize: '0.85rem' }}>
+                                            {new Date(r.updated_at || r.created_at).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                    <p style={{ margin: 0, fontStyle: r.review ? 'normal' : 'italic', color: r.review ? 'inherit' : 'var(--text-muted)' }}>
+                                        {r.review || "No written review provided."}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </article>
         </div>

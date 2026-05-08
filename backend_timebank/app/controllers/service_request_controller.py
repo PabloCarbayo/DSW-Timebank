@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.auth.jwt_handler import get_current_user
 from app.database import get_db
 from app.models.user import User
-from app.schemas.service_request import ServiceRequestCreate, ServiceRequestResponse
+from app.schemas.service_request import ServiceRequestCreate, ServiceRequestResponse, ServiceRequestReview
 from app.services.service_request_service import ServiceRequestService
 
 router = APIRouter(prefix="/api/v1/requests", tags=["Service Requests"])
@@ -82,3 +82,14 @@ def complete_request(
 ):
     """Complete a service request and trigger the time credit transfer (provider only)."""
     return service.complete_request(current_user.id, request_id)
+
+
+@router.post("/{request_id}/review", response_model=ServiceRequestResponse)
+def review_request(
+    request_id: int,
+    data: ServiceRequestReview,
+    current_user: User = Depends(get_current_user),
+    service: ServiceRequestService = Depends(get_request_service),
+):
+    """Leave a review for a completed service request (requester only)."""
+    return service.review_request(current_user.id, request_id, data.rating, data.review)

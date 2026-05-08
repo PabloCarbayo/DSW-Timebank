@@ -30,6 +30,20 @@ async def lifespan(app: FastAPI):
     """Create database tables on startup."""
     db_module.Base.metadata.create_all(bind=db_module.engine)
 
+    with db_module.engine.connect() as conn:
+        try:
+            from sqlalchemy import text
+            conn.execute(text("ALTER TABLE service_requests ADD COLUMN rating INT NULL;"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            from sqlalchemy import text
+            conn.execute(text("ALTER TABLE service_requests ADD COLUMN review TEXT NULL;"))
+            conn.commit()
+        except Exception:
+            pass
+
     with db_module.SessionLocal() as db:
         created_users = seed_default_users(db)
         if created_users:

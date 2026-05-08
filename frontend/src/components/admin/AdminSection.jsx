@@ -1,31 +1,82 @@
 import { useState, useEffect, useCallback } from "react";
-import { getUsers, updateUserAdmin, deleteUserAdmin } from "../../api/timebankApi";
+import { 
+    getUsers, updateUserAdmin, deleteUserAdmin,
+    getAllServicesAdmin, updateServiceAdmin, deleteServiceAdmin,
+    getAllTransactionsAdmin 
+} from "../../api/timebankApi";
 import { useAuth } from "../../context/AuthContext";
-import { Users, AlertTriangle, Search, Edit2, Trash2, CheckCircle2, XCircle } from "lucide-react";
+import { Users, AlertTriangle, Search, Edit2, Trash2, CheckCircle2, XCircle, Briefcase, Activity } from "lucide-react";
+import FeedbackModal from "../common/FeedbackModal";
 import "./AdminSection.css";
 
 export default function AdminSection() {
     const { token } = useAuth();
+    const [activeTab, setActiveTab] = useState("users");
+    
+    // Users state
     const [users, setUsers] = useState([]);
+    
+    // Services state
+    const [services, setServices] = useState([]);
+    
+    // Transactions state
+    const [transactions, setTransactions] = useState([]);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
 
+    // Modal state for Users
     const [editingUser, setEditingUser] = useState(null);
     const [editRolee, setEditRolee] = useState("user");
     const [editIsActive, setEditIsActive] = useState(true);
 
+    const [feedbackModal, setFeedbackModal] = useState({ isOpen: false });
+
+    const showFeedback = (title, message, variant = "info") => {
+        setFeedbackModal({
+            isOpen: true,
+            title,
+            message,
+            type: "alert",
+            variant,
+            onConfirm: () => setFeedbackModal({ isOpen: false })
+        });
+    };
+
     const fetchUsers = useCallback(async () => {
         if (!token) return;
         setLoading(true);
-        setError(null);
         try {
             const res = await getUsers(token);
-            if (res.status === 200) {
-                setUsers(res.data);
-            } else {
-                setError(res.data.detail || "Error loading users. Do you have Admin permissions?");
-            }
+            if (res.status === 200) setUsers(res.data);
+            else setError(res.data.detail || "Error loading users.");
+        } catch (err) {
+            setError(err.message);
+        }
+        setLoading(false);
+    }, [token]);
+
+    const fetchServices = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            const res = await getAllServicesAdmin(token);
+            if (res.status === 200) setServices(res.data.items || []);
+            else setError(res.data.detail || "Error loading services.");
+        } catch (err) {
+            setError(err.message);
+        }
+        setLoading(false);
+    }, [token]);
+
+    const fetchTransactions = useCallback(async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            const res = await getAllTransactionsAdmin(token);
+            if (res.status === 200) setTransactions(res.data);
+            else setError(res.data.detail || "Error loading transactions.");
         } catch (err) {
             setError(err.message);
         }
@@ -33,8 +84,10 @@ export default function AdminSection() {
     }, [token]);
 
     useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
+        if (activeTab === "users") fetchUsers();
+        else if (activeTab === "services") fetchServices();
+        else if (activeTab === "transactions") fetchTransactions();
+    }, [activeTab, fetchUsers, fetchServices, fetchTransactions]);
 
     const handleEditClick = (u) => {
         setEditingUser(u);
@@ -59,28 +112,81 @@ export default function AdminSection() {
                 setEditingUser(null);
                 fetchUsers();
             } else {
-                alert(res.data.detail || "Error updating.");
+                showFeedback("Error", res.data.detail || "Error updating.", "error");
             }
         } catch (err) {
-            alert(err.message);
+            showFeedback("Error", err.message, "error");
         }
         setLoading(false);
     };
 
-    const handleDeleteClick = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
-        setLoading(true);
+    const executeDeleteUser = async (userId) => {
         try {
             const res = await deleteUserAdmin(token, userId);
             if (res.status === 200 || res.status === 204) {
                 fetchUsers();
             } else {
-                alert(res.data.detail || "Error deleting user.");
+                showFeedback("Error", res.data.detail || "Error deleting user.", "error");
             }
         } catch (err) {
-            alert(err.message);
+            showFeedback("Error", err.message, "error");
         }
         setLoading(false);
+    };
+
+    const handleDeleteClick = (userId) => {
+        setFeedbackModal({
+            isOpen: true,
+            title: "Delete User",
+            message: "Are you sure you want to delete this user?",
+            type: "confirm",
+            variant: "warning",
+            onConfirm: () => {
+                setFeedbackModal({ isOpen: false });
+                setLoading(true);
+                executeDeleteUser(userId);
+            },
+            onCancel: () => setFeedbackModal({ isOpen: false })
+        });
+    };
+
+    const handleToggleServiceVisibility = async (service) => {
+        setLoading(true);
+        try {
+            const res = await updateServiceAdmin(token, service.id, { is_active: !service.is_active });
+            if (res.status === 200) fetchServices();
+            else showFeedback("Error", res.data.detail || "Error updating service.", "error");
+        } catch (err) {
+            showFeedback("Error", err.message, "error");
+        }
+        setLoading(false);
+    };
+
+    const executeDeleteService = async (serviceId) => {
+        try {
+            const res = await deleteServiceAdmin(token, serviceId);
+            if (res.status === 200 || res.status === 204) fetchServices();
+            else showFeedback("Error", res.data.detail || "Error deleting service.", "error");
+        } catch (err) {
+            showFeedback("Error", err.message, "error");
+        }
+        setLoading(false);
+    };
+
+    const handleDeleteService = (serviceId) => {
+        setFeedbackModal({
+            isOpen: true,
+            title: "Delete Service",
+            message: "Are you sure you want to delete this service?",
+            type: "confirm",
+            variant: "warning",
+            onConfirm: () => {
+                setFeedbackModal({ isOpen: false });
+                setLoading(true);
+                executeDeleteService(serviceId);
+            },
+            onCancel: () => setFeedbackModal({ isOpen: false })
+        });
     };
 
     const filteredUsers = users.filter((u) => {
@@ -103,20 +209,8 @@ export default function AdminSection() {
         );
     }
 
-    return (
-        <div className="section admin-section">
-            <h2 className="section-title"><Users size={22} /> User Management</h2>
-            <p className="section-subtitle">Administrator control panel</p>
-
-            {error && (
-                <div className="response-panel error" style={{ marginBottom: "20px" }}>
-                    <div className="response-header">
-                        <span className="status-badge">ERROR</span>
-                        <span className="status-text">{error}</span>
-                    </div>
-                </div>
-            )}
-
+    const renderUsers = () => (
+        <>
             <div className="admin-toolbar">
                 <div className="search-box">
                     <Search size={18} className="search-icon" />
@@ -191,8 +285,7 @@ export default function AdminSection() {
                     </table>
                 </div>
             </div>
-
-            {/* Modal de edición simulado in-page */}
+            
             {editingUser && (
                 <div className="modal-overlay">
                     <div className="modal-content card">
@@ -231,6 +324,163 @@ export default function AdminSection() {
                     </div>
                 </div>
             )}
+        </>
+    );
+
+    const renderServices = () => (
+        <>
+            <div className="admin-toolbar">
+                <div className="search-box">
+                    <Search size={18} className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search services..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <button className="btn btn-refresh" onClick={fetchServices} disabled={loading}>
+                    {loading ? "Loading..." : "Refresh"}
+                </button>
+            </div>
+            <div className="card table-card">
+                <div className="table-responsive">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Provider</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {services.filter(s => (s.title || "").toLowerCase().includes(searchTerm.toLowerCase())).map((s) => (
+                                <tr key={s.id}>
+                                    <td className="muted-text">#{s.id}</td>
+                                    <td>{s.title}</td>
+                                    <td>{s.category}</td>
+                                    <td>{s.provider?.first_name} {s.provider?.last_name}</td>
+                                    <td>{s.price} TB</td>
+                                    <td>
+                                        {s.is_active ? (
+                                            <span className="status-active"><CheckCircle2 size={14} /> Visible</span>
+                                        ) : (
+                                            <span className="status-inactive"><XCircle size={14} /> Hidden</span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        <div className="action-buttons">
+                                            <button className="btn btn-ghost" style={{ padding: "4px 8px", fontSize: "0.8rem" }} onClick={() => handleToggleServiceVisibility(s)}>
+                                                {s.is_active ? "Hide" : "Show"}
+                                            </button>
+                                            <button className="icon-btn delete" onClick={() => handleDeleteService(s.id)} title="Delete">
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </>
+    );
+
+    const renderTransactions = () => {
+        const totalTB = transactions.reduce((acc, t) => acc + (t.transaction_type === "credit_purchase" ? t.amount : 0), 0);
+        return (
+            <>
+                <div className="admin-toolbar">
+                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                        <div className="card" style={{ padding: '10px 20px', background: 'var(--card-bg)' }}>
+                            <strong>Total System Purchases: </strong> <span className="balance-positive">{totalTB.toFixed(2)} TB</span>
+                        </div>
+                        <div className="card" style={{ padding: '10px 20px', background: 'var(--card-bg)' }}>
+                            <strong>Total Transactions: </strong> <span>{transactions.length}</span>
+                        </div>
+                    </div>
+                    <button className="btn btn-refresh" onClick={fetchTransactions} disabled={loading}>
+                        {loading ? "Loading..." : "Refresh"}
+                    </button>
+                </div>
+                <div className="card table-card">
+                    <div className="table-responsive">
+                        <table className="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {transactions.map((tx) => (
+                                    <tr key={tx.id}>
+                                        <td className="muted-text">#{tx.id}</td>
+                                        <td>{new Date(tx.created_at).toLocaleString()}</td>
+                                        <td>{tx.transaction_type}</td>
+                                        <td>{tx.amount} TB</td>
+                                        <td>{tx.sender_name ?? tx.sender_id ?? "SYSTEM"}</td>
+                                        <td>{tx.receiver_name ?? tx.receiver_id}</td>
+                                        <td>{tx.description}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    return (
+        <div className="section admin-section">
+            <FeedbackModal {...feedbackModal} />
+            <h2 className="section-title"><Users size={22} /> Administration Panel</h2>
+            <p className="section-subtitle">Manage users, services, and transactions</p>
+
+            {error && (
+                <div className="response-panel error" style={{ marginBottom: "20px" }}>
+                    <div className="response-header">
+                        <span className="status-badge">ERROR</span>
+                        <span className="status-text">{typeof error === "string" ? error : JSON.stringify(error)}</span>
+                    </div>
+                </div>
+            )}
+
+            <div className="requests-tabs" style={{ marginBottom: "20px" }}>
+                <button
+                    className={`requests-tab ${activeTab === "users" ? "active" : ""}`}
+                    onClick={() => setActiveTab("users")}
+                >
+                    <Users size={14} /> Users
+                </button>
+                <button
+                    className={`requests-tab ${activeTab === "services" ? "active" : ""}`}
+                    onClick={() => setActiveTab("services")}
+                >
+                    <Briefcase size={14} /> Services
+                </button>
+                <button
+                    className={`requests-tab ${activeTab === "transactions" ? "active" : ""}`}
+                    onClick={() => setActiveTab("transactions")}
+                >
+                    <Activity size={14} /> Transactions
+                </button>
+            </div>
+
+            {activeTab === "users" && renderUsers()}
+            {activeTab === "services" && renderServices()}
+            {activeTab === "transactions" && renderTransactions()}
         </div>
     );
 }

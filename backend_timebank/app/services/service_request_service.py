@@ -116,6 +116,21 @@ class ServiceRequestService:
         service_request.status = RequestStatus.COMPLETED
         return self.request_repository.update(service_request)
 
+    def review_request(self, requester_id: int, request_id: int, rating: int, review: str | None) -> ServiceRequest:
+        """Leave a review for a completed service request."""
+        service_request = self._get_request_for_requester(requester_id, request_id)
+        self._assert_status(service_request, RequestStatus.COMPLETED)
+        
+        if service_request.rating is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Review already submitted for this request",
+            )
+            
+        service_request.rating = rating
+        service_request.review = review
+        return self.request_repository.update(service_request)
+
     def get_incoming_requests(self, provider_id: int) -> List[ServiceRequest]:
         """Return all requests received by the provider."""
         return self.request_repository.get_by_provider(provider_id)

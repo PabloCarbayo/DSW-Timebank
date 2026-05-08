@@ -215,10 +215,16 @@ export default function MarketplaceSection() {
                                             {(service.provider?.first_name || "U").charAt(0)}
                                         </div>
                                         <span className="provider-name">
-                                            {service.provider
-                                                ? `${service.provider.first_name} ${service.provider.last_name}`
+                                            {service.provider 
+                                                ? `${service.provider.first_name} ${service.provider.last_name}` 
                                                 : `Provider #${service.provider_id}`}
                                         </span>
+                                        {service.provider?.average_rating != null && (
+                                            <div className="service-rating-badge" style={{ marginLeft: "auto", display: "flex", alignItems: "center", fontSize: "0.85rem", color: "var(--warning-color)", fontWeight: "600", gap: '2px' }} title="Provider Reputation">
+                                                <Star size={14} style={{ fill: "currentColor" }} />
+                                                {service.provider.average_rating}
+                                            </div>
+                                        )}
                                     </div>
                                     <h3 className="service-title">{service.title || "Untitled"}</h3>
                                     <p className="service-description">
@@ -273,16 +279,24 @@ export default function MarketplaceSection() {
                         ) : selectedService ? (
                             <>
                                 <h3>{selectedService.title}</h3>
-                                <p className="marketplace-modal-meta">
+                                <p className="marketplace-modal-meta" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                     {selectedService.category} · {selectedService.price} TB / hr
                                 </p>
                                 <p className="marketplace-modal-description">
                                     {selectedService.description || "No description provided."}
                                 </p>
                                 {selectedService.provider && (
-                                    <p className="marketplace-modal-provider">
-                                        Provider: {selectedService.provider.first_name} {selectedService.provider.last_name} ({selectedService.provider.email})
-                                    </p>
+                                    <div className="marketplace-modal-provider" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <p style={{ margin: 0 }}>
+                                            <strong>Provider:</strong> {selectedService.provider.first_name} {selectedService.provider.last_name} ({selectedService.provider.email})
+                                        </p>
+                                        {selectedService.provider.average_rating != null && (
+                                            <span style={{ display: "flex", alignItems: "center", color: "var(--warning-color)", fontWeight: "bold", fontSize: "0.9rem" }} title="Provider Reputation">
+                                                <Star size={16} style={{ fill: "currentColor", marginRight: "4px" }} />
+                                                {selectedService.provider.average_rating} ({selectedService.provider.review_count} reviews)
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
 
                                 {requestFeedback && <p className="marketplace-request-feedback">{requestFeedback}</p>}

@@ -5,6 +5,7 @@ import {
     getOutgoingRequests,
     getServiceById,
     updateRequestStatus,
+    reviewRequest,
 } from "../../api/timebankApi";
 import {
     Inbox,
@@ -15,7 +16,9 @@ import {
     ClipboardCheck,
     RefreshCw,
     Clock3,
+    Star,
 } from "lucide-react";
+import FeedbackModal from "../common/FeedbackModal";
 import "./RequestsSection.css";
 
 const STATUS_META = {
@@ -49,6 +52,24 @@ export default function RequestsSection({ onBalanceChange }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [actionLoadingId, setActionLoadingId] = useState(null);
+
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewRequestId, setReviewRequestId] = useState(null);
+    const [ratingValue, setRatingValue] = useState(5);
+    const [reviewText, setReviewText] = useState("");
+
+    const [feedbackModal, setFeedbackModal] = useState({ isOpen: false });
+
+    const showFeedback = (title, message, variant = "info") => {
+        setFeedbackModal({
+            isOpen: true,
+            title,
+            message,
+            type: "alert",
+            variant,
+            onConfirm: () => setFeedbackModal({ isOpen: false })
+        });
+    };
 
     const loadRequests = useCallback(async (tab) => {
         if (!token) return;
@@ -114,6 +135,27 @@ export default function RequestsSection({ onBalanceChange }) {
         }
     };
 
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (!token || !reviewRequestId) return;
+        setActionLoadingId(reviewRequestId);
+        setError("");
+        try {
+            const payload = { rating: ratingValue, review: reviewText || null };
+            const res = await reviewRequest(token, reviewRequestId, payload);
+            if (res.status !== 200) {
+                showFeedback("Error", res.data?.detail || "Could not submit review.", "error");
+            } else {
+                setReviewModalOpen(false);
+                await loadRequests(activeTab);
+            }
+        } catch {
+            showFeedback("Error", "Connection error while submitting review.", "error");
+        } finally {
+            setActionLoadingId(null);
+        }
+    };
+
     const tabSummary = useMemo(() => {
         return activeTab === "incoming"
             ? "Requests you received as provider"
@@ -131,6 +173,7 @@ export default function RequestsSection({ onBalanceChange }) {
 
     return (
         <div className="section requests-section">
+            <FeedbackModal {...feedbackModal} />
             <div className="requests-header">
                 <div>
                     <h2 className="section-title"><Inbox size={22} /> Service Requests</h2>
@@ -183,6 +226,13 @@ export default function RequestsSection({ onBalanceChange }) {
                                     <span><strong>Created:</strong> {new Date(request.created_at).toLocaleString()}</span>
                                     {service?.category && <span><strong>Category:</strong> {service.category}</span>}
                                     {service?.price != null && <span><strong>Price:</strong> {service.price} TB</span>}
+                                    
+                                    {request.rating && (
+                                        <div className="request-review-display">
+                                            <span><strong>Rating:</strong> {request.rating} <Star size={14} style={{ display: 'inline', color: 'var(--success-color)' }} /></span>
+                                            {request.review && <p className="review-text">"{request.review}"</p>}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="request-actions">
@@ -224,12 +274,68 @@ export default function RequestsSection({ onBalanceChange }) {
                                             Cancel
                                         </button>
                                     )}
+                                    
+                                    {!isIncoming && request.status === "completed" && !request.rating && (
+                                        <button
+                                            className="btn btn-success"
+                                            onClick={() => {
+                                                setReviewRequestId(request.id);
+                                                setRatingValue(5);
+                                                setReviewText("");
+                                                setReviewModalOpen(true);
+                                            }}
+                                            disabled={actionLoadingId === request.id}
+                                        >
+                                            <Star size={14} style={{ marginRight: "4px" }} /> Leave Review
+                                        </button>
+                                    )}
                                 </div>
                             </article>
                         );
                     })
                 )}
             </div>
+
+            {reviewModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content card">
+                        <h3><Star size={18} /> Leave a Review</h3>
+                        <p className="muted-text">Rate the service you received to help others.</p>
+                        <form onSubmit={handleReviewSubmit}>
+                            <div className="form-field">
+                                <label>Rating (1-5)</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    value={ratingValue}
+                                    onChange={(e) => setRatingValue(Number(e.target.value))}
+                                    required
+                                    className="select-field"
+                                />
+                            </div>
+                            <div className="form-field">
+                                <label>Review Comment (Optional)</label>
+                                <textarea
+                                    value={reviewText}
+                                    onChange={(e) => setReviewText(e.target.value)}
+                                    rows="4"
+                                    placeholder="Write your experience here..."
+                                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid var(--border-color)", background: "var(--card-bg)" }}
+                                />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" className="btn btn-ghost" onClick={() => setReviewModalOpen(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-success" disabled={actionLoadingId === reviewRequestId}>
+                                    {actionLoadingId === reviewRequestId ? "Submitting..." : "Submit Review"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

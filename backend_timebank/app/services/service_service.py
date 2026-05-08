@@ -39,13 +39,15 @@ class ServiceService:
         keyword: Optional[str] = None,
         page: int = 1,
         page_size: int = 20,
+        include_inactive: bool = False,
     ) -> ServiceListResponse:
-        """Return a filtered, paginated list of active services."""
+        """Return a filtered, paginated list of services."""
         items, total = self.repository.get_all(
             category=category,
             keyword=keyword,
             page=page,
             page_size=page_size,
+            include_inactive=include_inactive,
         )
         return ServiceListResponse(
             items=[ServiceResponse.model_validate(item) for item in items],
@@ -80,6 +82,26 @@ class ServiceService:
         """Delete a service. Only the service owner can delete it."""
         service = self.get_service(service_id)
         self._assert_owner(user_id, service)
+        self.repository.delete(service)
+
+    def admin_update_service(self, service_id: int, data: ServiceUpdate) -> Service:
+        """Update a service as admin (ignores owner check)."""
+        service = self.get_service(service_id)
+        if data.title is not None:
+            service.title = data.title
+        if data.description is not None:
+            service.description = data.description
+        if data.category is not None:
+            service.category = data.category
+        if data.price is not None:
+            service.price = data.price
+        if data.is_active is not None:
+            service.is_active = data.is_active
+        return self.repository.update(service)
+
+    def admin_delete_service(self, service_id: int) -> None:
+        """Delete a service as admin (ignores owner check)."""
+        service = self.get_service(service_id)
         self.repository.delete(service)
 
     def _assert_owner(self, user_id: int, service: Service) -> None:

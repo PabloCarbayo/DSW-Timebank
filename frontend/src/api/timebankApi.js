@@ -209,3 +209,74 @@ export async function transferCredits(token, data) {
     return { status: res.status, data: await res.json() };
 }
 
+export async function reviewRequest(token, id, data) {
+    const res = await fetch(`${BASE}/requests/${id}/review`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function getAllServicesAdmin(token, params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.category) searchParams.set("category", params.category);
+    if (params.keyword) searchParams.set("keyword", params.keyword);
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.page_size) searchParams.set("page_size", String(params.page_size));
+
+    const query = searchParams.toString();
+    const url = query ? `${BASE}/services/all?${query}` : `${BASE}/services/all`;
+    const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function updateServiceAdmin(token, id, data) {
+    const res = await fetch(`${BASE}/services/${id}/admin`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function deleteServiceAdmin(token, id) {
+    const res = await fetch(`${BASE}/services/${id}/admin`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function getAllTransactionsAdmin(token) {
+    const res = await fetch(`${BASE}/transactions/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function forgotPassword(data) {
+    const res = await fetch(`${BASE}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    return { status: res.status, data: await res.json() };
+}
+
+export async function resetPassword(data) {
+    const res = await fetch(`${BASE}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    return { status: res.status, data: await res.json() };
+}

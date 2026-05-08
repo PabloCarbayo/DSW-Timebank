@@ -23,6 +23,16 @@ class TransactionRepository:
             .all()
         )
 
+    def get_all(self) -> List[Transaction]:
+        """Return all transactions, newest first."""
+        from sqlalchemy.orm import joinedload
+        return (
+            self.db.query(Transaction)
+            .options(joinedload(Transaction.sender), joinedload(Transaction.receiver))
+            .order_by(Transaction.created_at.desc())
+            .all()
+        )
+
     def create(self, transaction: Transaction) -> Transaction:
         self.db.add(transaction)
         self.db.commit()

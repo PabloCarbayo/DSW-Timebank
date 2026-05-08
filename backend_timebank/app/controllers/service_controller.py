@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.auth.jwt_handler import get_current_user
+from app.auth.jwt_handler import get_current_admin, get_current_user
 from app.database import get_db
 from app.models.user import User
 from app.schemas.service import ServiceCreate, ServiceListResponse, ServiceResponse, ServiceUpdate
@@ -52,6 +52,44 @@ def get_my_services(
     return service.get_my_services(current_user.id)
 
 
+@router.get("/all", response_model=ServiceListResponse)
+def list_all_services(
+    category: Optional[str] = Query(None, description="Filter by category"),
+    keyword: Optional[str] = Query(None, description="Search in title and description"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    current_admin: User = Depends(get_current_admin),
+    service: ServiceService = Depends(get_service_service),
+):
+    """List all services including inactive ones (Admin only)."""
+    return service.list_services(
+        category=category,
+        keyword=keyword,
+        page=page,
+        page_size=page_size,
+        include_inactive=True,
+    )
+
+@router.put("/{service_id}/admin", response_model=ServiceResponse)
+def update_service_admin(
+    service_id: int,
+    data: ServiceUpdate,
+    current_admin: User = Depends(get_current_admin),
+    service: ServiceService = Depends(get_service_service),
+):
+    """Update a service as admin (ignores owner check)."""
+    return service.admin_update_service(service_id, data)
+
+@router.delete("/{service_id}/admin")
+def delete_service_admin(
+    service_id: int,
+    current_admin: User = Depends(get_current_admin),
+    service: ServiceService = Depends(get_service_service),
+):
+    """Delete a service as admin (ignores owner check)."""
+    service.admin_delete_service(service_id)
+    return {"message": "Service deleted successfully"}
+
 @router.get("/{service_id}", response_model=ServiceResponse)
 def get_service(
     service_id: int,
@@ -81,3 +119,4 @@ def delete_service(
     """Delete a service. Only the service owner can delete it."""
     service.delete_service(current_user.id, service_id)
     return {"message": "Service deleted successfully"}
+

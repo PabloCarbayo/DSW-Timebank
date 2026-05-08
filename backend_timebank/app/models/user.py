@@ -38,3 +38,14 @@ class User(Base):
     received_transactions = relationship(
         "Transaction", foreign_keys="Transaction.receiver_id", back_populates="receiver",
     )
+
+    @property
+    def average_rating(self):
+        ratings = [r.rating for r in self.received_requests if r.rating is not None]
+        if not ratings:
+            return None
+        return round(sum(ratings) / len(ratings), 1)
+
+    @property
+    def review_count(self):
+        return len([r for r in self.received_requests if r.rating is not None])

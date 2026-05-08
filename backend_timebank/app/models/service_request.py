@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -30,6 +30,8 @@ class ServiceRequest(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+    rating = Column(Integer, nullable=True)
+    review = Column(Text, nullable=True)
 
     service = relationship("Service", back_populates="requests")
     requester = relationship("User", foreign_keys=[requester_id], back_populates="sent_requests")

@@ -16,7 +16,15 @@ class ServiceRequestResponse(BaseModel):
     requester_id: int
     provider_id: int
     status: str
+    rating: Optional[int] = None
+    review: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ServiceRequestReview(BaseModel):
+    """Schema for submitting a review for a completed service request."""
+    rating: int = Field(..., ge=1, le=5)
+    review: Optional[str] = Field(None, max_length=1000)

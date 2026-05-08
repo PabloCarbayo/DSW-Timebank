@@ -26,9 +26,12 @@ class ServiceRepository:
         keyword: Optional[str] = None,
         page: int = 1,
         page_size: int = 20,
+        include_inactive: bool = False,
     ) -> tuple[List[Service], int]:
-        """Return a filtered, paginated list of active services and total count."""
-        query = self.db.query(Service).filter(Service.is_active.is_(True))
+        """Return a filtered, paginated list of services and total count."""
+        query = self.db.query(Service)
+        if not include_inactive:
+            query = query.filter(Service.is_active.is_(True))
 
         if category:
             query = query.filter(Service.category.ilike(f"%{category}%"))

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.auth.jwt_handler import get_current_user
+from app.auth.jwt_handler import get_current_user, get_current_admin
 from app.database import get_db
 from app.models.user import User
 from app.schemas.transaction import (
@@ -79,3 +79,11 @@ def transfer_credits(
         receiver_id=data.receiver_id,
         receiver_email=data.receiver_email,
     )
+
+@router.get("/all", response_model=List[TransactionResponse])
+def get_all_transactions(
+    current_admin: User = Depends(get_current_admin),
+    service: TransactionService = Depends(get_transaction_service),
+):
+    """List all transactions in the system (Admin only)."""
+    return service.get_all_transactions()

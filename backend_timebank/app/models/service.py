@@ -26,3 +26,14 @@ class Service(Base):
 
     provider = relationship("User", back_populates="services")
     requests = relationship("ServiceRequest", back_populates="service", cascade="all, delete-orphan")
+
+    @property
+    def average_rating(self) -> float | None:
+        completed_requests = [r for r in self.requests if r.status == "completed" and r.rating is not None]
+        if not completed_requests:
+            return None
+        return round(sum(r.rating for r in completed_requests) / len(completed_requests), 1)
+
+    @property
+    def review_count(self) -> int:
+        return len([r for r in self.requests if r.status == "completed" and r.rating is not None])

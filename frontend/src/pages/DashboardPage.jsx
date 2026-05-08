@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [profileError, setProfileError] = useState("");
   const [profileSuccess, setProfileSuccess] = useState("");
   const [balance, setBalance] = useState(0);
+  const [userRole, setUserRole] = useState("user");
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [initialProfile, setInitialProfile] = useState({ first_name: "", last_name: "", email: "" });
   const [profileForm, setProfileForm] = useState({ first_name: "", last_name: "", email: "", password: "" });
@@ -63,17 +64,26 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const refreshBalance = useCallback(async () => {
+  const loadUserData = useCallback(async () => {
     if (!token) {
       setBalance(0);
+      setUserRole("user");
       return;
     }
 
     setBalanceLoading(true);
     try {
-      const res = await getBalance(token);
-      if (res.status === 200) {
-        setBalance(res.data.balance || 0);
+      const [balanceRes, profileRes] = await Promise.all([
+        getBalance(token),
+        getProfile(token)
+      ]);
+      
+      if (balanceRes.status === 200) {
+        setBalance(balanceRes.data.balance || 0);
+      }
+      
+      if (profileRes.status === 200) {
+        setUserRole(profileRes.data.role || "user");
       }
     } finally {
       setBalanceLoading(false);
@@ -81,8 +91,8 @@ export default function DashboardPage() {
   }, [token]);
 
   useEffect(() => {
-    refreshBalance();
-  }, [refreshBalance, activeTab]);
+    loadUserData();
+  }, [loadUserData, activeTab]);
 
   const fillProfileForm = (profile) => {
     const next = {
@@ -204,16 +214,19 @@ export default function DashboardPage() {
           </button>
 
           <nav className="header-nav" aria-label="Main navigation">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                className={`header-tab ${activeTab === tab.id ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <tab.icon size={16} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              if (tab.id === "admin" && userRole !== "admin") return null;
+              return (
+                <button
+                  key={tab.id}
+                  className={`header-tab ${activeTab === tab.id ? "active" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <tab.icon size={16} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </nav>
 
           <div className="header-user-wrap" ref={menuRef}>
@@ -247,9 +260,9 @@ export default function DashboardPage() {
       <main className="main-content floating-main">
         {activeTab === "marketplace" && <MarketplaceSection />}
         {activeTab === "myservices" && <MyServicesSection />}
-        {activeTab === "requests" && <RequestsSection onBalanceChange={refreshBalance} />}
-        {activeTab === "cards" && <CardsSection onBalanceChange={refreshBalance} />}
-        {activeTab === "profile" && <ProfileSection onBalanceChange={refreshBalance} />}
+        {activeTab === "requests" && <RequestsSection onBalanceChange={loadUserData} />}
+        {activeTab === "cards" && <CardsSection onBalanceChange={loadUserData} />}
+        {activeTab === "profile" && <ProfileSection onBalanceChange={loadUserData} />}
         {activeTab === "admin" && <AdminSection />}
       </main>
 
