@@ -500,6 +500,20 @@
   .pagination-btn {
     width: 100% !important;
   }
+
+  .section-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .marketplace-modal-card {
+    padding: 16px;
+  }
+
+  .marketplace-request-btn {
+    width: 100%;
+  }
 }
 
 @keyframes spin {
