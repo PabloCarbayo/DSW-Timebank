@@ -9,6 +9,11 @@ from app.repositories.service_repository import ServiceRepository
 from app.repositories.service_request_repository import ServiceRequestRepository
 from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.user_repository import UserRepository
+from app.services.email_service import (
+    send_service_requested_email,
+    send_service_completed_email,
+    send_service_reviewed_email,
+)
 
 
 class ServiceRequestService:
@@ -52,7 +57,19 @@ class ServiceRequestService:
             provider_id=service.provider_id,
             status=RequestStatus.PENDING,
         )
-        return self.request_repository.create(service_request)
+        created_request = self.request_repository.create(service_request)
+
+        # Notify provider
+        provider = self.user_repository.get_by_id(service.provider_id)
+        if provider:
+            send_service_requested_email(
+                provider_email=provider.email,
+                provider_name=provider.first_name,
+                requester_name=requester.first_name,
+                service_title=service.title
+            )
+
+        return created_request
 
     def accept_request(self, provider_id: int, request_id: int) -> ServiceRequest:
         """Accept a pending service request. Only the provider can accept."""
@@ -114,7 +131,17 @@ class ServiceRequestService:
         self.transaction_repository.create(transaction)
 
         service_request.status = RequestStatus.COMPLETED
-        return self.request_repository.update(service_request)
+        updated_request = self.request_repository.update(service_request)
+
+        # Notify requester
+        if requester:
+            send_service_completed_email(
+                requester_email=requester.email,
+                requester_name=requester.first_name,
+                service_title=service.title
+            )
+
+        return updated_request
 
     def review_request(self, requester_id: int, request_id: int, rating: int, review: str | None) -> ServiceRequest:
         """Leave a review for a completed service request."""
@@ -129,7 +156,23 @@ class ServiceRequestService:
             
         service_request.rating = rating
         service_request.review = review
-        return self.request_repository.update(service_request)
+        updated_request = self.request_repository.update(service_request)
+
+        # Notify provider
+        service = self.service_repository.get_by_id(service_request.service_id)
+        provider = self.user_repository.get_by_id(service_request.provider_id)
+        requester = self.user_repository.get_by_id(requester_id)
+        if provider and requester and service:
+            send_service_reviewed_email(
+                provider_email=provider.email,
+                provider_name=provider.first_name,
+                requester_name=requester.first_name,
+                service_title=service.title,
+                rating=rating,
+                review_text=review
+            )
+
+        return updated_request
 
     def get_incoming_requests(self, provider_id: int) -> List[ServiceRequest]:
         """Return all requests received by the provider."""

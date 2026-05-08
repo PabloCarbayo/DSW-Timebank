@@ -47,3 +47,71 @@ The Time Bank Team
             status_code=500,
             detail=f"Failed to send email: {str(e)}"
         )
+
+def _send_email_safe(msg: EmailMessage):
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        print("Warning: SMTP configuration missing, email not sent.")
+        return
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+            server.send_message(msg)
+    except Exception as e:
+        print(f"Failed to send notification email: {str(e)}")
+
+def send_service_requested_email(provider_email: str, provider_name: str, requester_name: str, service_title: str):
+    msg = EmailMessage()
+    msg["Subject"] = "Time Bank - New Service Request!"
+    msg["From"] = SMTP_EMAIL
+    msg["To"] = provider_email
+    msg.set_content(f"""\
+Hi {provider_name},
+
+Great news! {requester_name} has just requested your service: "{service_title}".
+
+Log in to Time Bank to accept or reject this request.
+
+Thanks,
+The Time Bank Team
+""")
+    _send_email_safe(msg)
+
+def send_service_completed_email(requester_email: str, requester_name: str, service_title: str):
+    msg = EmailMessage()
+    msg["Subject"] = "Time Bank - Service Completed!"
+    msg["From"] = SMTP_EMAIL
+    msg["To"] = requester_email
+    msg.set_content(f"""\
+Hi {requester_name},
+
+The service you requested: "{service_title}" has been marked as completed!
+The time credits have been transferred.
+
+Don't forget to log in and leave a review for the provider.
+
+Thanks,
+The Time Bank Team
+""")
+    _send_email_safe(msg)
+
+def send_service_reviewed_email(provider_email: str, provider_name: str, requester_name: str, service_title: str, rating: int, review_text: str):
+    msg = EmailMessage()
+    msg["Subject"] = "Time Bank - New Review Received!"
+    msg["From"] = SMTP_EMAIL
+    msg["To"] = provider_email
+    
+    review_content = review_text if review_text else "No written review provided."
+    msg.set_content(f"""\
+Hi {provider_name},
+
+You just received a new review from {requester_name} for your service: "{service_title}".
+
+Rating: {rating}/5
+Review: "{review_content}"
+
+Keep up the great work!
+
+Thanks,
+The Time Bank Team
+""")
+    _send_email_safe(msg)
