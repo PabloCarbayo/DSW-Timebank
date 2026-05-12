@@ -23,6 +23,7 @@ import app.models.user  # noqa: F401
 import app.models.service  # noqa: F401
 import app.models.service_request  # noqa: F401
 import app.models.transaction  # noqa: F401
+import app.models.message  # noqa: F401
 
 
 @asynccontextmanager

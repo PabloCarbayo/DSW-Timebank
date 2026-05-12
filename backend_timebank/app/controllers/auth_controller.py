@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -25,16 +25,31 @@ def register(
 @router.post("/login", response_model=TokenResponse)
 def login(
     credentials: UserLogin,
+    response: Response,
     service: AuthService = Depends(get_auth_service),
 ):
     """Log in and obtain a JWT token."""
     token = service.login(credentials)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=3600
+    )
     return TokenResponse(access_token=token)
 
 
 @router.post("/logout")
-def logout():
+def logout(response: Response):
     """Log out. In stateless JWT, the client discards the token."""
+    response.delete_cookie(
+        key="access_token",
+        secure=True,
+        httponly=True,
+        samesite="lax"
+    )
     return {"message": "Successfully logged out"}
 
 

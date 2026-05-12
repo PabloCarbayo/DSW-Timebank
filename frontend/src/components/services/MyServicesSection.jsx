@@ -55,7 +55,7 @@ export function MyServicesSection() {
     const fetchMyServices = async () => {
         setLoading(true);
         try {
-            const res = await getMyServices(token);
+            const res = await getMyServices();
             if (res.status === 200) {
                 setServices(Array.isArray(res.data) ? res.data : (res.data.items || []));
             } else {
@@ -96,7 +96,7 @@ export function MyServicesSection() {
         e.preventDefault();
         try {
             if (modalMode === "create") {
-                const res = await createService(token, { ...formData, price: parseFloat(formData.price) });
+                const res = await createService({ ...formData, price: parseFloat(formData.price) });
                 if (res.status === 201 || res.status === 200) {
                     fetchMyServices();
                     setIsModalOpen(false);
@@ -104,7 +104,7 @@ export function MyServicesSection() {
                     showFeedback("Error", res.data.detail || "Error creating service", "error");
                 }
             } else {
-                const res = await updateService(token, currentServiceId, { ...formData, price: parseFloat(formData.price) });
+                const res = await updateService(currentServiceId, { ...formData, price: parseFloat(formData.price) });
                 if (res.status === 200) {
                     fetchMyServices();
                     setIsModalOpen(false);
@@ -119,7 +119,7 @@ export function MyServicesSection() {
 
     const executeDelete = async (id) => {
         try {
-            const res = await deleteService(token, id);
+            const res = await deleteService(id);
             if (res.status === 204 || res.status === 200) {
                 fetchMyServices();
             } else {

@@ -74,8 +74,8 @@ export default function DashboardPage() {
     setBalanceLoading(true);
     try {
       const [balanceRes, profileRes] = await Promise.all([
-        getBalance(token),
-        getProfile(token)
+        getBalance(),
+        getProfile()
       ]);
       
       if (balanceRes.status === 200) {
@@ -120,7 +120,7 @@ export default function DashboardPage() {
     setProfileLoading(true);
 
     try {
-      const res = await getProfile(token);
+      const res = await getProfile();
       if (res.status === 200) {
         fillProfileForm(res.data || {});
       } else {
@@ -178,7 +178,7 @@ export default function DashboardPage() {
     setProfileError("");
 
     try {
-      const res = await updateProfile(token, payload);
+      const res = await updateProfile(payload);
       if (res.status === 200) {
         setInitialProfile((prev) => ({ ...prev, first_name: nextFirst, last_name: nextLast }));
         setProfileForm((prev) => ({ ...prev, first_name: nextFirst, last_name: nextLast, password: "" }));

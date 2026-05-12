@@ -17,8 +17,10 @@ import {
     RefreshCw,
     Clock3,
     Star,
+    MessageSquare,
 } from "lucide-react";
 import FeedbackModal from "../common/FeedbackModal";
+import ChatWindow from "./ChatWindow";
 import "./RequestsSection.css";
 
 const STATUS_META = {
@@ -52,6 +54,7 @@ export default function RequestsSection({ onBalanceChange }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [actionLoadingId, setActionLoadingId] = useState(null);
+    const [chatRequestId, setChatRequestId] = useState(null);
 
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
     const [reviewRequestId, setReviewRequestId] = useState(null);
@@ -77,7 +80,7 @@ export default function RequestsSection({ onBalanceChange }) {
         setLoading(true);
         setError("");
         try {
-            const res = tab === "incoming" ? await getIncomingRequests(token) : await getOutgoingRequests(token);
+            const res = tab === "incoming" ? await getIncomingRequests() : await getOutgoingRequests();
             if (res.status !== 200) {
                 setError(res.data?.detail || "Error loading requests.");
                 setRequests([]);
@@ -119,7 +122,7 @@ export default function RequestsSection({ onBalanceChange }) {
         setError("");
 
         try {
-            const res = await updateRequestStatus(token, requestId, action);
+            const res = await updateRequestStatus(requestId, action);
             if (res.status !== 200) {
                 setError(res.data?.detail || "Could not update request status.");
             } else {
@@ -142,7 +145,7 @@ export default function RequestsSection({ onBalanceChange }) {
         setError("");
         try {
             const payload = { rating: ratingValue, review: reviewText || null };
-            const res = await reviewRequest(token, reviewRequestId, payload);
+            const res = await reviewRequest(reviewRequestId, payload);
             if (res.status !== 200) {
                 showFeedback("Error", res.data?.detail || "Could not submit review.", "error");
             } else {
@@ -236,6 +239,14 @@ export default function RequestsSection({ onBalanceChange }) {
                                 </div>
 
                                 <div className="request-actions">
+                                    <button 
+                                        className="btn btn-outline" 
+                                        onClick={() => setChatRequestId(request.id)}
+                                        title="Open Chat"
+                                    >
+                                        <MessageSquare size={14} style={{ marginRight: "4px" }} /> Chat
+                                    </button>
+
                                     {isIncoming && request.status === "pending" && (
                                         <>
                                             <button
@@ -295,6 +306,13 @@ export default function RequestsSection({ onBalanceChange }) {
                     })
                 )}
             </div>
+
+            {chatRequestId && (
+                <ChatWindow 
+                    request={requests.find(r => r.id === chatRequestId)} 
+                    onClose={() => setChatRequestId(null)} 
+                />
+            )}
 
             {reviewModalOpen && (
                 <div className="modal-overlay">

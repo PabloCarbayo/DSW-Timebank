@@ -123,7 +123,7 @@ export default function MarketplaceSection() {
         setRequestLoading(true);
         setRequestFeedback("");
         try {
-            const res = await createRequest(token, { service_id: selectedService.id });
+            const res = await createRequest({ service_id: selectedService.id });
             if (res.status === 200 || res.status === 201) {
                 setRequestFeedback("Request sent successfully.");
             } else {

@@ -20,8 +20,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await loginUser({ email, password });
-      if (res.status === 200 && res.data.access_token) {
-        login(res.data.access_token, email);
+      if (res.status === 200) {
+        await login();
         navigate("/dashboard");
       } else {
         setError(res.data.detail || res.data.error || "Wrong credentials");

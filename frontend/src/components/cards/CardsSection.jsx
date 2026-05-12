@@ -42,7 +42,7 @@ function BuyCreditsForm({ onBalanceChange }) {
         setError("");
 
         try {
-            const response = await purchaseCredits(token, { amount });
+            const response = await purchaseCredits({ amount });
 
             if (response.status === 200 || response.status === 201) {
                 const checkoutUrl = response.data.checkout_url;

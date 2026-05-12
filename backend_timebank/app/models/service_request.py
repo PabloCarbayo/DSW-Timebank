@@ -37,3 +37,4 @@ class ServiceRequest(Base):
     requester = relationship("User", foreign_keys=[requester_id], back_populates="sent_requests")
     provider = relationship("User", foreign_keys=[provider_id], back_populates="received_requests")
     transaction = relationship("Transaction", back_populates="service_request", uselist=False)
+    messages = relationship("Message", back_populates="service_request", cascade="all, delete-orphan")

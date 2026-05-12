@@ -48,7 +48,7 @@ export default function AdminSection() {
         if (!token) return;
         setLoading(true);
         try {
-            const res = await getUsers(token);
+            const res = await getUsers();
             if (res.status === 200) setUsers(res.data);
             else setError(res.data.detail || "Error loading users.");
         } catch (err) {
@@ -61,7 +61,7 @@ export default function AdminSection() {
         if (!token) return;
         setLoading(true);
         try {
-            const res = await getAllServicesAdmin(token);
+            const res = await getAllServicesAdmin();
             if (res.status === 200) setServices(res.data.items || []);
             else setError(res.data.detail || "Error loading services.");
         } catch (err) {
@@ -74,7 +74,7 @@ export default function AdminSection() {
         if (!token) return;
         setLoading(true);
         try {
-            const res = await getAllTransactionsAdmin(token);
+            const res = await getAllTransactionsAdmin();
             if (res.status === 200) setTransactions(res.data);
             else setError(res.data.detail || "Error loading transactions.");
         } catch (err) {
@@ -107,7 +107,7 @@ export default function AdminSection() {
                 role: editRolee,
                 is_active: editIsActive,
             };
-            const res = await updateUserAdmin(token, editingUser.id, payload);
+            const res = await updateUserAdmin(editingUser.id, payload);
             if (res.status === 200) {
                 setEditingUser(null);
                 fetchUsers();
@@ -122,7 +122,7 @@ export default function AdminSection() {
 
     const executeDeleteUser = async (userId) => {
         try {
-            const res = await deleteUserAdmin(token, userId);
+            const res = await deleteUserAdmin(userId);
             if (res.status === 200 || res.status === 204) {
                 fetchUsers();
             } else {
@@ -153,7 +153,7 @@ export default function AdminSection() {
     const handleToggleServiceVisibility = async (service) => {
         setLoading(true);
         try {
-            const res = await updateServiceAdmin(token, service.id, { is_active: !service.is_active });
+            const res = await updateServiceAdmin(service.id, { is_active: !service.is_active });
             if (res.status === 200) fetchServices();
             else showFeedback("Error", res.data.detail || "Error updating service.", "error");
         } catch (err) {
@@ -164,7 +164,7 @@ export default function AdminSection() {
 
     const executeDeleteService = async (serviceId) => {
         try {
-            const res = await deleteServiceAdmin(token, serviceId);
+            const res = await deleteServiceAdmin(serviceId);
             if (res.status === 200 || res.status === 204) fetchServices();
             else showFeedback("Error", res.data.detail || "Error deleting service.", "error");
         } catch (err) {

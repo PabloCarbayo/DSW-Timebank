@@ -24,10 +24,10 @@ export default function ProfileSection({ onBalanceChange }) {
 
         try {
             const [profileRes, balanceRes, txRes, reqsRes] = await Promise.all([
-                getProfile(token),
-                getBalance(token),
-                getTransactions(token),
-                getIncomingRequests(token),
+                getProfile(),
+                getBalance(),
+                getTransactions(),
+                getIncomingRequests(),
             ]);
 
             if (profileRes.status === 200) setProfile(profileRes.data);
@@ -75,7 +75,7 @@ export default function ProfileSection({ onBalanceChange }) {
         setTransferLoading(true);
         setTransferFeedback("");
         try {
-            const res = await transferCredits(token, payload);
+            const res = await transferCredits(payload);
             if (res.status === 200 || res.status === 201) {
                 setTransferFeedback("Transfer completed successfully.");
                 setRecipient("");

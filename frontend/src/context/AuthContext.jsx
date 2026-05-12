@@ -1,53 +1,48 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getProfile } from "../api/timebankApi";
+import { getProfile, logoutUser } from "../api/timebankApi";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-    const [token, setToken] = useState(() => localStorage.getItem("token") || null);
-    const [userEmail, setUserEmail] = useState(() => localStorage.getItem("userEmail") || null);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchUser() {
-            if (token) {
-                try {
-                    const res = await getProfile(token);
-                    if (res.status === 200) {
-                        setUser(res.data);
-                        setUserEmail(res.data.email);
-                    } else {
-                        logout();
-                    }
-                } catch (e) {
-                    console.error("Error fetching user profile", e);
+            try {
+                const res = await getProfile();
+                if (res.status === 200) {
+                    setUser(res.data);
+                } else {
+                    setUser(null);
                 }
-            } else {
+            } catch (e) {
+                console.error("Error fetching user profile", e);
                 setUser(null);
             }
             setLoading(false);
         }
         fetchUser();
-    }, [token]);
+    }, []);
 
-    const login = (jwt, email) => {
-        setToken(jwt);
-        setUserEmail(email);
-        localStorage.setItem("token", jwt);
-        localStorage.setItem("userEmail", email);
+    const login = async () => {
+        try {
+            const res = await getProfile();
+            if (res.status === 200) {
+                setUser(res.data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch profile after login", e);
+        }
     };
 
-    const logout = () => {
-        setToken(null);
-        setUserEmail(null);
+    const logout = async () => {
+        await logoutUser();
         setUser(null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("userEmail");
     };
 
     return (
-        <AuthContext.Provider value={{ token, userEmail, user, loading, login, logout }}>
+        <AuthContext.Provider value={{ token: !!user, userEmail: user?.email, user, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

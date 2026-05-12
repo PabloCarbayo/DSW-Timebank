@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.service_request import RequestStatus, ServiceRequest
 from app.models.transaction import Transaction, TransactionType
+from app.models.message import Message
 from app.repositories.service_repository import ServiceRepository
 from app.repositories.service_request_repository import ServiceRequestRepository
 from app.repositories.transaction_repository import TransactionRepository
@@ -181,6 +182,34 @@ class ServiceRequestService:
     def get_outgoing_requests(self, requester_id: int) -> List[ServiceRequest]:
         """Return all requests sent by the requester."""
         return self.request_repository.get_by_requester(requester_id)
+
+    def get_messages(self, user_id: int, request_id: int) -> List[Message]:
+        """Get all messages for a request. Ensures the user is part of the request."""
+        service_request = self.request_repository.get_by_id(request_id)
+        if not service_request:
+            raise HTTPException(status_code=404, detail="Request not found")
+        if user_id not in (service_request.requester_id, service_request.provider_id):
+            raise HTTPException(status_code=403, detail="Not authorized to view these messages")
+        
+        return self.db.query(Message).filter(Message.request_id == request_id).order_by(Message.created_at.asc()).all()
+
+    def send_message(self, user_id: int, request_id: int, content: str) -> Message:
+        """Send a message to a request chat. Ensures the user is part of the request."""
+        service_request = self.request_repository.get_by_id(request_id)
+        if not service_request:
+            raise HTTPException(status_code=404, detail="Request not found")
+        if user_id not in (service_request.requester_id, service_request.provider_id):
+            raise HTTPException(status_code=403, detail="Not authorized to send messages here")
+        
+        message = Message(
+            request_id=request_id,
+            sender_id=user_id,
+            content=content
+        )
+        self.db.add(message)
+        self.db.commit()
+        self.db.refresh(message)
+        return message
 
     # ── Private helpers ───────────────────────────────
 
