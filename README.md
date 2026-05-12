@@ -1,5 +1,4 @@
-# User Guide - Time Bank (Sprint 1)
-
+# User Guide - Time Bank
 Welcome to **Time Bank**, the peer-to-peer service exchange platform where your time is the currency. Throughout this guide, you will learn how to set up the development environment and take your first steps using the application.
 
 ---
@@ -133,3 +132,34 @@ For developers and delivery validation, with the system (Docker) running, you ha
 - **API Documentation (Swagger UI):**
   - **Main Backend:** Explore and test all endpoints at [http://localhost:8000/docs](http://localhost:8000/docs).
   - **Payments Backend:** Documentation at [http://localhost:8001/docs](http://localhost:8001/docs).
+
+
+## 5. Stripe Payment Gateway Setup
+
+To test the real payment gateway integration using Stripe locally, you must use the Stripe CLI to forward events (webhooks) to your local backend. Follow these steps:
+
+### 1. Authenticate with Stripe CLI
+If you haven't already, install the [Stripe CLI](https://stripe.com/docs/stripe-cli) and log in to your Stripe account:
+```bash
+stripe login
+```
+
+### 2. Configure Environment Variables
+You need to add your Stripe API keys to your `.env` file (in the project root):
+```env
+STRIPE_API_KEY=sk_test_... # Your Stripe Secret Key
+```
+
+### 3. Start the Webhook Listener
+To receive payment confirmation events on your local machine, run the following command in a new terminal window:
+```bash
+stripe listen --forward-to localhost:8000/api/v1/transactions/webhook
+```
+*Keep this terminal open while testing payments.*
+
+### 4. Set the Webhook Secret
+When you run the command above, the CLI will display a "webhook signing secret" that starts with `whsec_`. Copy this value and add it to your `.env` file:
+```env
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+*(If you are running the project with Docker, you will need to restart the backend container `docker compose restart timebank-backend` for the new environment variable to take effect).*
