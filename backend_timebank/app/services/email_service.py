@@ -4,7 +4,17 @@ from email.message import EmailMessage
 from fastapi import HTTPException
 
 SMTP_EMAIL = os.getenv("SMTP_EMAIL")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD") or os.getenv("GMAIL_APP_PWD")
+
+
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Missing required environment variable: {name}",
+        )
+    return value
 
 
 def send_password_reset_email(to_email: str, token: str):
@@ -15,7 +25,7 @@ def send_password_reset_email(to_email: str, token: str):
             detail="Email configuration is missing from environment variables."
         )
 
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = _require_env("FRONTEND_URL")
     reset_link = f"{frontend_url}/reset-password?token={token}"
 
     msg = EmailMessage()

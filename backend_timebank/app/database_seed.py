@@ -10,20 +10,27 @@ def _truthy(value: str) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if value is None or value == "":
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
 def _get_default_users() -> list[dict[str, str]]:
     return [
         {
-            "email": os.getenv("DEFAULT_ADMIN_EMAIL", "admin@timebank.com").strip().lower(),
-            "password": os.getenv("DEFAULT_ADMIN_PASSWORD", "admin123"),
-            "first_name": os.getenv("DEFAULT_ADMIN_FIRST_NAME", "Default"),
-            "last_name": os.getenv("DEFAULT_ADMIN_LAST_NAME", "Admin"),
+            "email": _require_env("DEFAULT_ADMIN_EMAIL").strip().lower(),
+            "password": _require_env("DEFAULT_ADMIN_PASSWORD"),
+            "first_name": _require_env("DEFAULT_ADMIN_FIRST_NAME"),
+            "last_name": _require_env("DEFAULT_ADMIN_LAST_NAME"),
             "role": "admin",
         },
         {
-            "email": os.getenv("DEFAULT_USER_EMAIL", "user@timebank.com").strip().lower(),
-            "password": os.getenv("DEFAULT_USER_PASSWORD", "user123"),
-            "first_name": os.getenv("DEFAULT_USER_FIRST_NAME", "Default"),
-            "last_name": os.getenv("DEFAULT_USER_LAST_NAME", "User"),
+            "email": _require_env("DEFAULT_USER_EMAIL").strip().lower(),
+            "password": _require_env("DEFAULT_USER_PASSWORD"),
+            "first_name": _require_env("DEFAULT_USER_FIRST_NAME"),
+            "last_name": _require_env("DEFAULT_USER_LAST_NAME"),
             "role": "user",
         },
     ]
@@ -31,7 +38,8 @@ def _get_default_users() -> list[dict[str, str]]:
 
 def seed_default_users(db: Session) -> list[str]:
     """Create default admin/user accounts if missing. Returns created emails."""
-    if not _truthy(os.getenv("SEED_DEFAULT_USERS", "true")):
+    seed_default_users_value = _require_env("SEED_DEFAULT_USERS")
+    if not _truthy(seed_default_users_value):
         return []
 
     created_emails: list[str] = []

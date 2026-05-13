@@ -11,9 +11,25 @@ from app.database import get_db
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "timebank-secret-key-change-in-production")
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+def _get_access_token_expire_minutes() -> int:
+    value = _require_env("JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
+    try:
+        return int(value)
+    except ValueError:
+        raise RuntimeError("JWT_ACCESS_TOKEN_EXPIRE_MINUTES must be an integer") from None
+
+
+SECRET_KEY = _require_env("JWT_SECRET_KEY")
+ALGORITHM = _require_env("JWT_ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = _get_access_token_expire_minutes()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 

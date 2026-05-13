@@ -4,9 +4,9 @@ services:
     image: mysql
     container_name: timebank-mysql
     environment:
-      MYSQL_DATABASE: timebank
-      MYSQL_ROOT_PASSWORD: 'root'
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "${MYSQL_ALLOW_EMPTY_PASSWORD}"
     ports:
       - "3306:3306"
     volumes:
@@ -25,10 +25,10 @@ services:
     ports:
       - "8081:80"
     environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: 'root'
+      PMA_HOST: "${PMA_HOST}"
+      PMA_PORT: "${PMA_PORT}"
+      PMA_USER: "${PMA_USER}"
+      PMA_PASSWORD: "${PMA_PASSWORD}"
     depends_on:
       - mysql
 
@@ -39,18 +39,25 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: "mysql+pymysql://root:root@mysql:3306/timebank"
-      SEED_DEFAULT_USERS: "true"
-      DEFAULT_ADMIN_EMAIL: "admin@timebank.com"
-      DEFAULT_ADMIN_PASSWORD: "admin123"
-      DEFAULT_USER_EMAIL: "user@timebank.com"
-      DEFAULT_USER_PASSWORD: "user123"
+      TIMEBANK_DATABASE_URL: "${TIMEBANK_DATABASE_URL}"
+      SEED_DEFAULT_USERS: "${SEED_DEFAULT_USERS}"
+      DEFAULT_ADMIN_EMAIL: "${DEFAULT_ADMIN_EMAIL}"
+      DEFAULT_ADMIN_PASSWORD: "${DEFAULT_ADMIN_PASSWORD}"
+      DEFAULT_ADMIN_FIRST_NAME: "${DEFAULT_ADMIN_FIRST_NAME}"
+      DEFAULT_ADMIN_LAST_NAME: "${DEFAULT_ADMIN_LAST_NAME}"
+      DEFAULT_USER_EMAIL: "${DEFAULT_USER_EMAIL}"
+      DEFAULT_USER_PASSWORD: "${DEFAULT_USER_PASSWORD}"
+      DEFAULT_USER_FIRST_NAME: "${DEFAULT_USER_FIRST_NAME}"
+      DEFAULT_USER_LAST_NAME: "${DEFAULT_USER_LAST_NAME}"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
+      JWT_ALGORITHM: "${JWT_ALGORITHM}"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "${JWT_ACCESS_TOKEN_EXPIRE_MINUTES}"
       STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
       STRIPE_PUBLISHABLE_KEY: "${STRIPE_PUBLISHABLE_KEY}"
       STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
       SMTP_EMAIL: "${SMTP_EMAIL}"
       SMTP_PASSWORD: "${GMAIL_APP_PWD}"
-      FRONTEND_URL: "https://localhost:5173"
+      FRONTEND_URL: "${FRONTEND_URL}"
     depends_on:
       mysql:
         condition: service_healthy
@@ -63,7 +70,7 @@ services:
     ports:
       - "8001:8001"
     environment:
-      DATABASE_URL: "mysql+pymysql://root:root@mysql:3306/payments"
+      PAYMENTS_DATABASE_URL: "${PAYMENTS_DATABASE_URL}"
     depends_on:
       mysql:
         condition: service_healthy

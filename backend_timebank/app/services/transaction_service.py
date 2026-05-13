@@ -9,7 +9,15 @@ from app.models.transaction import Transaction, TransactionType
 from app.repositories.transaction_repository import TransactionRepository
 from app.repositories.user_repository import UserRepository
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+def _require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+FRONTEND_URL = _require_env("FRONTEND_URL")
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
