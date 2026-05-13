@@ -20,6 +20,13 @@ Depending on the execution method you choose, you will need to have the followin
 
 The project consists of several components that must be running simultaneously: a database, two Backend servers (*Timebank* and *Payments*), and a Frontend server. You have two options to get the application up and running.
 
+Before starting, you must configure a .env file in the root of the project. This file contains the environment variables required for the services to run correctly and is used by Docker Compose and the backends.
+
+To set it up:
+1. Copy the template from [.env.example](.env.example) to [.env](.env).
+2. Fill in the values for database URLs, JWT settings, Stripe keys, and email credentials.
+3. If you change any values while the containers are running, restart the services to apply the new environment.
+
 ### Option A: Execution via Docker (Recommended)
 The system is fully containerized to facilitate deployment and avoid compatibility issues.
 
