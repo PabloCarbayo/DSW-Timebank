@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -35,6 +35,9 @@ export default function App() {
             {/* Aquí añadiríamos rutas solo para admins como: */}
             {/* <Route path="/admin" element={<AdminDashboardPage />} /> */}
           </Route>
+
+          {/* Catch-all: redirect any unknown route to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
